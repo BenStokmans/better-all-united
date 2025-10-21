@@ -1,5 +1,6 @@
 import type { ModalConfig, ModalRef, ImportReport } from '../types';
 import { makeEl, copyToClipboard } from '../utils/dom';
+import { t } from '../i18n';
 import { createButton } from './components';
 
 export const showOverlayModal = ({
@@ -141,17 +142,17 @@ export const showProgressModal = (
 
   const statusEl = makeEl(
     'div',
-    { text: 'Preparing...' },
+    { text: t('preparing') },
     { marginTop: '4px', color: '#6b7280', fontSize: '13px' }
   );
 
   const overlayRef = showOverlayModal({
-    title: 'Importing members',
+    title: t('importing_members'),
     bodyNodes: [progressTrack, progressLabel, currentName, statusEl],
     footerNodes: [
       createButton({
         id: '',
-        text: 'Cancel',
+        text: t('cancel'),
         onClick: () => {
           statusEl.textContent = 'Aborting...';
           onCancel?.();
@@ -191,19 +192,19 @@ export const showProgressModal = (
         : `${safeCompleted}`;
 
     if (step === 'start' && name) {
-      currentName.textContent = `Processing: ${name}`;
-      statusEl.textContent = 'Resolving contact...';
+      currentName.textContent = t('processing_prefix', { name });
+      statusEl.textContent = t('resolving_contact');
     }
 
     if (step === 'complete') {
       const messages: Record<string, string> = {
-        found: 'Imported successfully.',
-        notFound: 'No matching contact.',
-        ambiguous: 'Multiple candidates found.',
-        error: 'Error during lookup.',
+        found: t('message_found'),
+        notFound: t('message_notFound'),
+        ambiguous: t('message_ambiguous'),
+        error: t('message_error'),
       };
 
-      if (name) currentName.textContent = `Completed: ${name}`;
+      if (name) currentName.textContent = t('completed_prefix', { name });
       if (outcome && messages[outcome]) statusEl.textContent = messages[outcome];
     }
   };
@@ -218,7 +219,7 @@ export const showProgressModal = (
 const buildReportText = ({ successes, notFound, ambiguous }: ImportReport): string => {
   const lines: string[] = [];
 
-  lines.push(`Imported: ${successes.length}`);
+  lines.push(`${t('imported')} ${successes.length}`);
   if (successes.length) {
     lines.push(
       ...successes.map(
@@ -227,7 +228,7 @@ const buildReportText = ({ successes, notFound, ambiguous }: ImportReport): stri
     );
   }
 
-  lines.push(`Ambiguous: ${ambiguous.length}`);
+  lines.push(`${t('ambiguous')} ${ambiguous.length}`);
   if (ambiguous.length) {
     lines.push(
       ...ambiguous.map(
@@ -239,7 +240,7 @@ const buildReportText = ({ successes, notFound, ambiguous }: ImportReport): stri
     );
   }
 
-  lines.push(`Not found: ${notFound.length}`);
+  lines.push(`${t('not_found')} ${notFound.length}`);
   if (notFound.length) {
     lines.push(...notFound.map((n) => `  - ${n.name}: ${n.reason || '(no reason)'}`));
   }
@@ -262,7 +263,7 @@ export const showReportModal = (report: ImportReport): void => {
     [
       makeEl(
         'div',
-        { text: `Imported\n${successes.length}` },
+        { text: `${t('imported')}\n${successes.length}` },
         {
           background: '#ecfdf5',
           border: '1px solid #a7f3d0',
@@ -276,7 +277,7 @@ export const showReportModal = (report: ImportReport): void => {
       ),
       makeEl(
         'div',
-        { text: `Ambiguous\n${ambiguous.length}` },
+        { text: `${t('ambiguous')}\n${ambiguous.length}` },
         {
           background: '#fffbeb',
           border: '1px solid #fde68a',
@@ -290,7 +291,7 @@ export const showReportModal = (report: ImportReport): void => {
       ),
       makeEl(
         'div',
-        { text: `Not Found\n${notFound.length}` },
+        { text: `${t('not_found')}\n${notFound.length}` },
         {
           background: '#fef2f2',
           border: '1px solid #fecaca',
@@ -322,7 +323,7 @@ export const showReportModal = (report: ImportReport): void => {
 
     if (!items.length) {
       container.appendChild(
-        makeEl('div', { text: '— none —' }, { color: '#6b7280' })
+        makeEl('div', { text: t('none') }, { color: '#6b7280' })
       );
       return container;
     }
@@ -411,21 +412,21 @@ export const showReportModal = (report: ImportReport): void => {
     title: 'Import report',
     bodyNodes: [
       summary,
-      section('Imported', successes, successItem),
-      section('Ambiguous', ambiguous, ambItem),
-      section('Not Found', notFound, nfItem),
+      section(t('imported'), successes, successItem),
+      section(t('ambiguous'), ambiguous, ambItem),
+      section(t('not_found'), notFound, nfItem),
     ],
     footerNodes: [
       createButton({
         id: '',
-        text: 'Copy summary',
+        text: t('copy_summary'),
         onClick: async (e) => {
           const ok = await copyToClipboard(buildReportText(report));
           (e.target as HTMLButtonElement).textContent = ok
-            ? 'Copied!'
-            : 'Copy failed';
+            ? t('copied')
+            : t('copy_failed');
           setTimeout(
-            () => ((e.target as HTMLButtonElement).textContent = 'Copy summary'),
+            () => ((e.target as HTMLButtonElement).textContent = t('copy_summary')),
             1200
           );
         },
@@ -433,7 +434,7 @@ export const showReportModal = (report: ImportReport): void => {
       }),
       createButton({
         id: '',
-        text: 'Close',
+        text: t('close'),
         onClick: () => overlay.remove(),
         styles: { background: '#6b7280', border: '1px solid #6b7280' },
       }),

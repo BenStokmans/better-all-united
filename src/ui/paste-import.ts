@@ -4,10 +4,11 @@ import { parseBySeparator } from '../utils/names';
 import { importCourseMembers, getPriceCodeOptions } from '../services/importer';
 import { showOverlayModal, showProgressModal, showReportModal } from './modals';
 import { createButton } from './components';
+import { t } from '../i18n';
 
 export const openPasteImportDialog = (): void => {
   const { overlay, modal } = showOverlayModal({
-    title: 'Import from pasted list',
+    title: t('import_from_pasted_list'),
     bodyNodes: [],
     footerNodes: [],
     width: 760,
@@ -18,16 +19,16 @@ export const openPasteImportDialog = (): void => {
     {},
     { display: 'flex', gap: '8px', alignItems: 'center', marginTop: '6px' },
     [
-      makeEl('label', { for: 'sepSelect', text: 'Separator:' }),
+  makeEl('label', { for: 'sepSelect', text: t('separator') }),
       makeEl(
         'select',
         { id: 'sepSelect' },
         {},
         [
-          makeEl('option', { value: 'auto', text: 'Auto-detect' }),
-          makeEl('option', { value: 'enter', text: 'Enter (newline)' }),
-          makeEl('option', { value: 'tab', text: 'Tab' }),
-          makeEl('option', { value: 'comma', text: 'Comma (,)' }),
+          makeEl('option', { value: 'auto', text: t('auto_detect') }),
+          makeEl('option', { value: 'enter', text: t('enter_newline') }),
+          makeEl('option', { value: 'tab', text: t('tab') }),
+          makeEl('option', { value: 'comma', text: t('comma') }),
         ]
       ),
     ]
@@ -35,7 +36,7 @@ export const openPasteImportDialog = (): void => {
 
   const ta = makeEl(
     'textarea',
-    { id: 'pasteArea', placeholder: 'Paste names here…' },
+    { id: 'pasteArea', placeholder: t('paste_names_here') },
     {
       width: '100%',
       height: '200px',
@@ -51,7 +52,7 @@ export const openPasteImportDialog = (): void => {
 
   const preview = makeEl(
     'div',
-    { text: 'Detected: 0' },
+    { text: t('detected_count', { count: 0 }) },
     { color: '#6b7280', marginTop: '6px' }
   );
 
@@ -77,14 +78,14 @@ export const openPasteImportDialog = (): void => {
 
   const cancelBtn = createButton({
     id: '',
-    text: 'Cancel',
+    text: t('cancel'),
     onClick: () => overlay.remove(),
     styles: { background: '#6b7280', border: '1px solid #6b7280' },
   });
 
   const importBtn = createButton({
     id: '',
-    text: 'Start import',
+    text: t('start_import'),
     onClick: () => {},
     styles: { background: '#0ea5a5', border: '1px solid #0ea5a5' },
   });
@@ -138,9 +139,9 @@ export const openPasteImportDialog = (): void => {
         { id: 'prijscodeSelect' },
         { flex: '1', padding: '6px', borderRadius: '6px', border: '1px solid #d1d5db' },
         [
-          makeEl('option', {
-            value: '',
-            text: 'Selecteer prijscode',
+      makeEl('option', {
+        value: '',
+        text: t('selecteer_prijscode'),
           }),
           ...options.map((opt) =>
             makeEl('option', {
@@ -177,17 +178,17 @@ export const openPasteImportDialog = (): void => {
     const names = parseBySeparator(ta.value, sep);
 
     if (!names.length) {
-      alert('No names detected.');
+      alert(t('no_names_detected'));
       return;
     }
 
     if (requiresPriceCode() && !priceCodeSelect?.value) {
-      alert('Selecteer eerst een prijscode.');
+      alert(t('select_pricecode_for_all'));
       return;
     }
 
-    importBtn.disabled = true;
-    importBtn.textContent = `Importing ${names.length}...`;
+  importBtn.disabled = true;
+  importBtn.textContent = t('importing_count', { count: names.length });
 
     let progress: ReturnType<typeof showProgressModal> | null = null;
     const controller = new AbortController();

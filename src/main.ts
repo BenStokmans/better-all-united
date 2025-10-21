@@ -2,6 +2,7 @@ import { createInputButton } from './ui/components';
 import { openExcelImportDialog } from './ui/excel-import';
 import { openPasteImportDialog } from './ui/paste-import';
 import { onElementAvailable, ready } from './utils/dom';
+import { t } from './i18n';
 
 const attachCourseMembersButtons = (): void => {
   const selector =
@@ -17,8 +18,9 @@ const attachCourseMembersButtons = (): void => {
     if (!targetContainer.querySelector(`#${idExcel}`)) {
       const button1 = createInputButton({
         id: idExcel,
-        text: 'Import from Excel',
+        text: t('import_excel'),
         onClick: openExcelImportDialog,
+        styles: { marginRight: '8px' },
       });
       targetContainer.appendChild(button1);
     }
@@ -26,7 +28,7 @@ const attachCourseMembersButtons = (): void => {
     if (!targetContainer.querySelector(`#${idPaste}`)) {
       const button2 = createInputButton({
         id: idPaste,
-        text: 'Import from pasted list',
+        text: t('import_paste'),
         onClick: openPasteImportDialog,
       });
       targetContainer.appendChild(button2);

@@ -4,6 +4,7 @@ import { makeEl } from '../utils/dom';
 import { importCourseMembers, getPriceCodeOptions } from '../services/importer';
 import { showOverlayModal, showProgressModal, showReportModal } from './modals';
 import { createButton } from './components';
+import { t } from '../i18n';
 
 const colToIndex = (col: string): number => {
   const c = String(col || '')
@@ -31,7 +32,7 @@ interface ExtractedEntry {
 
 export const openExcelImportDialog = async (): Promise<void> => {
   const overlayRef = showOverlayModal({
-    title: 'Import members from Excel',
+    title: t('import_from_excel'),
     bodyNodes: [],
     footerNodes: [],
   });
@@ -39,7 +40,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
   const { overlay, modal } = overlayRef;
 
   const fileRow = makeEl('div', {}, { margin: '10px 0' }, [
-    makeEl('label', { for: 'excelFile', text: 'Select file: ' }, {}, []),
+  makeEl('label', { for: 'excelFile', text: t('select_file') }, {}, []),
     makeEl('input', {
       id: 'excelFile',
       type: 'file',
@@ -53,7 +54,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
     {},
     { margin: '10px 0', display: 'none' },
     [
-      makeEl('label', { for: 'sheetSelect', text: 'Sheet: ' }),
+  makeEl('label', { for: 'sheetSelect', text: t('sheet') }),
       makeEl('select', { id: 'sheetSelect' }, {}, []),
     ]
   );
@@ -68,7 +69,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
       alignItems: 'center',
     },
     [
-      makeEl('label', { for: 'colInput', text: 'Column letter:' }),
+  makeEl('label', { for: 'colInput', text: t('column_letter') }),
       makeEl('input', {
         id: 'colInput',
         type: 'text',
@@ -76,23 +77,23 @@ export const openExcelImportDialog = async (): Promise<void> => {
         placeholder: 'e.g. A',
         size: '3',
       }),
-      makeEl('label', { for: 'rowFrom', text: 'Rows from:' }),
+  makeEl('label', { for: 'rowFrom', text: t('rows_from') }),
       makeEl('input', {
         id: 'rowFrom',
         type: 'number',
         min: '1',
         value: '2',
       }),
-      makeEl('label', { for: 'rowTo', text: 'to:' }),
+  makeEl('label', { for: 'rowTo', text: t('to') }),
       makeEl('input', { id: 'rowTo', type: 'number', min: '1', value: '100' }),
-      makeEl('label', { for: 'hasHeader', text: 'Header row (skip first)?' }),
+  makeEl('label', { for: 'hasHeader', text: t('header_row_skip') }),
       makeEl('input', { id: 'hasHeader', type: 'checkbox', checked: 'true' }),
     ]
   );
 
   const previewTitle = makeEl(
     'div',
-    { text: 'Preview (first 25 names):' },
+    { text: t('preview_first_25') },
     { margin: '6px 0', display: 'none', fontWeight: '600' }
   );
 
@@ -121,14 +122,14 @@ export const openExcelImportDialog = async (): Promise<void> => {
 
   const cancelBtn = createButton({
     id: 'excel-cancel',
-    text: 'Cancel',
+    text: t('cancel'),
     onClick: () => overlay.remove(),
     styles: { background: '#6b7280', border: '1px solid #6b7280' },
   });
 
   const importBtn = createButton({
     id: 'excel-import',
-    text: 'Start import',
+    text: t('start_import'),
     onClick: () => {},
     styles: { background: '#0ea5a5', border: '1px solid #0ea5a5' },
   });
@@ -359,7 +360,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
 
     const colLetter = getPriceColumnLetter();
     if (!colLetter) {
-      priceCodeNotice.textContent = 'Voer eerst een kolomletter in voor de prijscodes.';
+    priceCodeNotice.textContent = t('enter_pricecode_column_letter');
       priceCodeMappingState.clear();
       updateImportButtonState();
       return;
@@ -367,13 +368,13 @@ export const openExcelImportDialog = async (): Promise<void> => {
 
     const uniqueValues = getUniquePriceValues();
     if (!uniqueValues.length) {
-      priceCodeNotice.textContent = 'Geen waarden gevonden in de opgegeven kolom binnen het bereik.';
+  priceCodeNotice.textContent = t('no_values_in_column');
       priceCodeMappingState.clear();
       updateImportButtonState();
       return;
     }
 
-    priceCodeNotice.textContent = 'Koppel elke waarde aan een prijscode:';
+  priceCodeNotice.textContent = t('map_each_value');
 
     const nextState = new Map<string, string>();
     uniqueValues.forEach((value) => {
@@ -393,7 +394,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
           border: '1px solid #d1d5db',
         },
         [
-          makeEl('option', { value: '', text: 'Selecteer prijscode' }),
+          makeEl('option', { value: '', text: t('selecteer_prijscode') }),
           ...(priceCodeOptions || []).map((opt) =>
             makeEl('option', {
               value: opt.value,
@@ -561,7 +562,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
           {},
           { display: 'flex', gap: '8px', alignItems: 'center' },
           [
-            makeEl('label', { for: 'priceCodeColumn', text: 'Kolom voor prijscode:' }),
+            makeEl('label', { for: 'priceCodeColumn', text: t('column_for_pricecode') }),
             priceCodeColumnInput,
           ]
         ),
@@ -603,7 +604,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
       refreshPriceCodeMappingList();
       updateImportButtonState();
     } catch (err) {
-      console.warn('Failed to load prijscode opties', err);
+      console.warn(t('failed_load_pricecodes', { msg: String(err) }));
     }
   })();
 
@@ -613,16 +614,16 @@ export const openExcelImportDialog = async (): Promise<void> => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
-      importBtn.disabled = true;
-      importBtn.textContent = 'Reading file...';
+  importBtn.disabled = true;
+  importBtn.textContent = t('reading_file');
 
       try {
         await readFile(file);
-        importBtn.textContent = 'Start import';
+        importBtn.textContent = t('start_import');
         refreshPreview();
       } catch (err) {
-        importBtn.textContent = 'Start import';
-        alert(`Failed to read file: ${(err as Error).message || err}`);
+        importBtn.textContent = t('start_import');
+        alert(t('failed_read_file', { msg: (err as Error).message || String(err) }));
       } finally {
         updateImportButtonState();
       }
@@ -650,32 +651,32 @@ export const openExcelImportDialog = async (): Promise<void> => {
     const names = uniqueEntries.map((entry) => entry.name);
 
     if (!names.length) {
-      alert('No names found in the selected range.');
+      alert(t('no_names_selected_range'));
       return;
     }
 
     if (requiresPriceCode()) {
       if (priceMode === 'single') {
         if (!priceCodeSelectSingle?.value) {
-          alert('Selecteer een prijscode voor alle deelnemers.');
+          alert(t('select_pricecode_for_all'));
           return;
         }
       } else {
         const colLetter = getPriceColumnLetter();
         if (!colLetter) {
-          alert('Geef de kolom op die prijscode waarden bevat.');
+          alert(t('give_pricecode_column'));
           return;
         }
 
         const uniqueValues = getUniquePriceValues();
         if (!uniqueValues.length) {
-          alert('Geen waarden gevonden in de opgegeven prijscode kolom.');
+          alert(t('no_values_in_pricecode_column'));
           return;
         }
 
         const missing = uniqueValues.filter((value) => !priceCodeMappingState.get(value));
         if (missing.length) {
-          alert('Maak voor alle waarden in de prijscode kolom een mapping.');
+          alert(t('make_mapping'));
           return;
         }
       }
@@ -685,10 +686,10 @@ export const openExcelImportDialog = async (): Promise<void> => {
     const controller = new AbortController();
 
     try {
-      importBtn.disabled = true;
-      importBtn.textContent = `Importing ${names.length}...`;
+  importBtn.disabled = true;
+  importBtn.textContent = t('importing_count', { count: names.length });
 
-      progress = showProgressModal(names.length, () => controller.abort());
+  progress = showProgressModal(names.length, () => controller.abort());
 
       const priceCodeResolver = requiresPriceCode()
         ? priceMode === 'single'
@@ -707,7 +708,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
         priceCodeResolver,
       });
 
-      progress.finish();
+  progress.finish();
       progress = null;
       overlay.remove();
       showReportModal(report);
@@ -717,11 +718,11 @@ export const openExcelImportDialog = async (): Promise<void> => {
         progress = null;
       }
       if ((e as DOMException)?.name === 'AbortError') return;
-      alert(`Import failed: ${(e as Error).message || e}`);
+      alert(t('import_failed', { msg: (e as Error).message || String(e) }));
     } finally {
       if (modal.isConnected) {
         importBtn.disabled = false;
-        importBtn.textContent = 'Start import';
+        importBtn.textContent = t('start_import');
         updateImportButtonState();
       }
     }
