@@ -1,0 +1,56 @@
+name: Release Extension
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  build-and-package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build extension
+        run: pnpm run build
+
+      - name: Package extension
+        id: package
+        env:
+          RELEASE_VERSION: ${{ github.event.release.tag_name || github.ref_name }}
+        run: |
+          ARCHIVE_NAME="better-all-united-${RELEASE_VERSION:-dev}.zip"
+          zip -r "$ARCHIVE_NAME" manifest.json dist icons -x "*.DS_Store"
+          echo "archive-name=$ARCHIVE_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Upload packaged extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.archive-name }}
+          path: ${{ steps.package.outputs.archive-name }}
+
+      - name: Attach asset to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.package.outputs.archive-name }}
