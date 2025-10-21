@@ -1,0 +1,74 @@
+export interface ParsedName {
+  firstName: string;
+  lastName: string;
+}
+
+export interface SearchOption {
+  value: string;
+  label: string;
+}
+
+export interface ContactSearchResult {
+  status: 'found' | 'notFound' | 'ambiguous';
+  data?: SearchOption;
+  reason?: string;
+  candidates?: string[];
+}
+
+export interface ImportSuccess {
+  name: string;
+  contactId: string;
+  label: string;
+}
+
+export interface ImportNotFound {
+  name: string;
+  reason: string;
+}
+
+export interface ImportAmbiguous {
+  name: string;
+  reason: string;
+  candidates: string[];
+}
+
+export interface ImportReport {
+  successes: ImportSuccess[];
+  notFound: ImportNotFound[];
+  ambiguous: ImportAmbiguous[];
+  aborted?: boolean;
+}
+
+export interface ProgressUpdate {
+  step: 'start' | 'complete' | 'cancel';
+  index: number;
+  total: number;
+  completed: number;
+  name: string;
+  outcome?: 'found' | 'notFound' | 'ambiguous' | 'error';
+}
+
+export interface ImportOptions {
+  onProgress?: (update: ProgressUpdate) => void;
+  signal?: AbortSignal | null;
+}
+
+export interface ButtonConfig {
+  id: string;
+  text: string;
+  onClick: (e: MouseEvent) => void;
+  styles?: Partial<CSSStyleDeclaration>;
+  attributes?: Record<string, string>;
+}
+
+export interface ModalConfig {
+  title: string;
+  bodyNodes: HTMLElement[];
+  footerNodes: HTMLElement[];
+  width?: number;
+}
+
+export interface ModalRef {
+  overlay: HTMLElement;
+  modal: HTMLElement;
+}
