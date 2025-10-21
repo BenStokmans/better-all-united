@@ -1,6 +1,16 @@
-import type { ImportReport, ImportOptions } from '../types';
+import type { ImportReport, ImportOptions, PriceCodeOption } from '../types';
 import { findContactForName } from './search';
 import { sleep } from '../utils/dom';
+
+const contactInputSelector =
+  'input.find-field[name*="course[_subforms_][coursemembers]"][name$="[contactid]"]';
+
+const normalize = (value: string): string =>
+  String(value || '')
+    .normalize('NFC')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
 
 const clickAddRow = async (): Promise<void> => {
   const btns = Array.from(document.querySelectorAll('input')).filter(
@@ -30,11 +40,21 @@ const clickAddRow = async (): Promise<void> => {
   await sleep(150);
 };
 
-const fillLatestContactId = async (contactId: string): Promise<void> => {
+const hasEmptyContactInput = (): boolean =>
+  Array.from(document.querySelectorAll<HTMLInputElement>(contactInputSelector)).some(
+    (input) => !normalize(input.value)
+  );
+
+const ensureContactRowAvailable = async (): Promise<void> => {
+  if (hasEmptyContactInput()) return;
+  await clickAddRow();
+};
+
+const fillLatestContactId = async (
+  contactId: string
+): Promise<HTMLInputElement> => {
   const inputs = Array.from(
-    document.querySelectorAll<HTMLInputElement>(
-      'input.find-field[name*="course[_subforms_][coursemembers]"][name$="[contactid]"]'
-    )
+    document.querySelectorAll<HTMLInputElement>(contactInputSelector)
   );
 
   if (!inputs.length) throw new Error('No contactid inputs found.');
@@ -56,6 +76,170 @@ const fillLatestContactId = async (contactId: string): Promise<void> => {
   target.dispatchEvent(new Event('change', { bubbles: true }));
   target.blur();
   await sleep(100);
+  return target;
+};
+
+const gatherRows = (table: HTMLTableElement): HTMLTableRowElement[] => {
+  const bodyRows = Array.from(table.querySelectorAll<HTMLTableRowElement>('tbody tr'));
+  if (bodyRows.length) return bodyRows;
+  return Array.from(table.querySelectorAll<HTMLTableRowElement>('tr')).filter(
+    (row) => !row.closest('thead')
+  );
+};
+
+interface PriceCodeContext {
+  columnIndex: number;
+  options: PriceCodeOption[];
+  table: HTMLTableElement;
+}
+
+let priceCodeContext: PriceCodeContext | null = null;
+let priceCodeContextPromise: Promise<PriceCodeContext | null> | null = null;
+
+const findPriceCodeHeader = (): { table: HTMLTableElement; columnIndex: number } | null => {
+  const span = Array.from(
+    document.querySelectorAll<HTMLSpanElement>('td span')
+  ).find((el) => normalize(el.textContent || '') === 'prijscode');
+
+  if (!span) return null;
+
+  const td = span.closest<HTMLTableCellElement>('td');
+  if (!td) return null;
+
+  const headerRow = td.parentElement as HTMLTableRowElement | null;
+  if (!headerRow) return null;
+
+  const headerCells = Array.from(headerRow.children).filter(
+    (node): node is HTMLTableCellElement => node instanceof HTMLTableCellElement
+  );
+
+  const columnIndex = headerCells.indexOf(td);
+  if (columnIndex === -1) return null;
+
+  const table = td.closest('table') as HTMLTableElement | null;
+  if (!table) return null;
+
+  return { table, columnIndex };
+};
+
+const findPriceCodeSelect = (
+  table: HTMLTableElement,
+  columnIndex: number
+): HTMLSelectElement | null => {
+  const rows = gatherRows(table);
+
+  for (const row of rows) {
+    const cells = Array.from(row.children).filter(
+      (node): node is HTMLTableCellElement => node instanceof HTMLTableCellElement
+    );
+    const cell = cells[columnIndex];
+    if (!cell) continue;
+    const select = cell.querySelector('select');
+    if (select) return select as HTMLSelectElement;
+  }
+
+  return null;
+};
+
+const ensurePriceCodeContext = async (): Promise<PriceCodeContext | null> => {
+  if (priceCodeContext) return priceCodeContext;
+  if (priceCodeContextPromise) return priceCodeContextPromise;
+
+  priceCodeContextPromise = (async () => {
+    const headerInfo = findPriceCodeHeader();
+    if (!headerInfo) return null;
+
+    const { table, columnIndex } = headerInfo;
+    let select = findPriceCodeSelect(table, columnIndex);
+
+    if (!select) {
+      await clickAddRow();
+      select = findPriceCodeSelect(table, columnIndex);
+    }
+
+    if (!select) return null;
+
+    const allOptions = Array.from(select.options).map((opt) => ({
+      value: String(opt.value ?? ''),
+      label: String(opt.textContent ?? opt.label ?? ''),
+    }));
+
+    const usable = allOptions.filter((opt) => normalize(opt.value) !== '');
+
+    priceCodeContext = {
+      table,
+      columnIndex,
+      options: usable.length ? usable : allOptions,
+    };
+
+    return priceCodeContext;
+  })().catch((err) => {
+    console.warn('Failed to prepare prijscode context', err);
+    return null;
+  });
+
+  const ctx = await priceCodeContextPromise;
+  if (!ctx) {
+    priceCodeContext = null;
+    priceCodeContextPromise = null;
+    return null;
+  }
+
+  priceCodeContextPromise = null;
+  return ctx;
+};
+
+export const getPriceCodeOptions = async (): Promise<PriceCodeOption[] | null> => {
+  const ctx = await ensurePriceCodeContext();
+  return ctx?.options ?? null;
+};
+
+const applyPriceCodeToRow = (
+  contactInput: HTMLInputElement,
+  priceCodeValue: string,
+  ctx: PriceCodeContext
+): void => {
+  if (!priceCodeValue) return;
+
+  const row = contactInput.closest('tr');
+  if (!row) return;
+
+  const cells = Array.from(row.children).filter(
+    (node): node is HTMLTableCellElement => node instanceof HTMLTableCellElement
+  );
+  const cell = cells[ctx.columnIndex];
+
+  const select = (cell?.querySelector('select') || row.querySelector('select')) as
+    | HTMLSelectElement
+    | null;
+
+  if (!select) {
+    console.warn('Could not find prijscode select in the row');
+    return;
+  }
+
+  let resolvedValue = priceCodeValue;
+
+  const hasExactValue = Array.from(select.options).some(
+    (opt) => opt.value === resolvedValue
+  );
+
+  if (!hasExactValue) {
+    const fallback = ctx.options.find(
+      (opt) =>
+        opt.value === priceCodeValue || normalize(opt.label) === normalize(priceCodeValue)
+    );
+    if (!fallback) {
+      console.warn(`Prijscode value "${priceCodeValue}" not available in select.`);
+      return;
+    }
+    resolvedValue = fallback.value;
+  }
+
+  if (select.value !== resolvedValue) {
+    select.value = resolvedValue;
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+  }
 };
 
 export const importCourseMembers = async (
@@ -69,6 +253,14 @@ export const importCourseMembers = async (
   const successes: ImportReport['successes'] = [];
   const total = names.length;
   let completed = 0;
+
+  const priceCodeCtx = options.priceCodeResolver
+    ? await ensurePriceCodeContext()
+    : null;
+
+  if (options.priceCodeResolver && !priceCodeCtx) {
+    console.warn('Prijscode resolver provided, but no prijscode column was detected.');
+  }
 
   for (let idx = 0; idx < names.length; idx++) {
     const fullName = names[idx];
@@ -94,8 +286,23 @@ export const importCourseMembers = async (
 
       switch (result.status) {
         case 'found':
-          await clickAddRow();
-          await fillLatestContactId(result.data!.value);
+          await ensureContactRowAvailable();
+          const contactInput = await fillLatestContactId(result.data!.value);
+
+          if (priceCodeCtx && options.priceCodeResolver) {
+            const priceCodeValue = options.priceCodeResolver({
+              index: idx,
+              name: fullName,
+              contact: result.data!,
+            });
+
+            if (priceCodeValue) {
+              applyPriceCodeToRow(contactInput, String(priceCodeValue), priceCodeCtx);
+            } else {
+              console.warn(`No prijscode selected for ${fullName}; leaving default.`);
+            }
+          }
+
           successes.push({
             name: fullName,
             contactId: String(result.data!.value),

@@ -30,3 +30,26 @@ export const createButton = ({
 
   return button;
 };
+
+export const createInputButton = ({
+  id,
+  text,
+  onClick,
+  styles = {},
+  attributes = {},
+}: ButtonConfig): HTMLInputElement => {
+  const button = document.createElement('input');
+  button.id = id;
+  button.type = 'button';
+  button.value = text;
+
+  Object.entries(attributes).forEach(([k, v]) => button.setAttribute(k, v));
+
+  Object.assign(button.style, {
+    ...styles,
+  });
+
+  button.addEventListener('click', onClick as EventListener);
+
+  return button;
+};

@@ -1,7 +1,7 @@
-import { ready, onElementAvailable } from './utils/dom';
-import { createButton } from './ui/components';
+import { createInputButton } from './ui/components';
 import { openExcelImportDialog } from './ui/excel-import';
 import { openPasteImportDialog } from './ui/paste-import';
+import { onElementAvailable, ready } from './utils/dom';
 
 const attachCourseMembersButtons = (): void => {
   const selector =
@@ -9,33 +9,27 @@ const attachCourseMembersButtons = (): void => {
   const idExcel = 'import-course-members-excel';
   const idPaste = 'import-course-members-paste';
 
-  onElementAvailable(selector, (container) => {
-    if (!container.querySelector(`#${idExcel}`)) {
-      const button1 = createButton({
+  onElementAvailable(selector, () => {
+    const targetContainers = document.getElementsByClassName("subform-table__new-row");
+    if (targetContainers.length === 0) return;
+    const targetContainer = targetContainers[0];
+
+    if (!targetContainer.querySelector(`#${idExcel}`)) {
+      const button1 = createInputButton({
         id: idExcel,
         text: 'Import from Excel',
         onClick: openExcelImportDialog,
-        styles: {
-          marginTop: '12px',
-          background: '#6366f1',
-          border: '1px solid #6366f1',
-        },
       });
-      container.appendChild(button1);
+      targetContainer.appendChild(button1);
     }
 
-    if (!container.querySelector(`#${idPaste}`)) {
-      const button2 = createButton({
+    if (!targetContainer.querySelector(`#${idPaste}`)) {
+      const button2 = createInputButton({
         id: idPaste,
         text: 'Import from pasted list',
         onClick: openPasteImportDialog,
-        styles: {
-          marginTop: '12px',
-          background: '#10b981',
-          border: '1px solid #10b981',
-        },
       });
-      container.appendChild(button2);
+      targetContainer.appendChild(button2);
     }
   });
 };

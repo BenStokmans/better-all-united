@@ -8,6 +8,11 @@ export interface SearchOption {
   label: string;
 }
 
+export interface PriceCodeOption {
+  value: string;
+  label: string;
+}
+
 export interface ContactSearchResult {
   status: 'found' | 'notFound' | 'ambiguous';
   data?: SearchOption;
@@ -39,6 +44,12 @@ export interface ImportReport {
   aborted?: boolean;
 }
 
+export interface PriceCodeResolverContext {
+  index: number;
+  name: string;
+  contact: SearchOption;
+}
+
 export interface ProgressUpdate {
   step: 'start' | 'complete' | 'cancel';
   index: number;
@@ -51,6 +62,7 @@ export interface ProgressUpdate {
 export interface ImportOptions {
   onProgress?: (update: ProgressUpdate) => void;
   signal?: AbortSignal | null;
+  priceCodeResolver?: (ctx: PriceCodeResolverContext) => string | null | undefined;
 }
 
 export interface ButtonConfig {
