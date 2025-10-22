@@ -7,9 +7,7 @@ import { createButton } from './components';
 import { t } from '../i18n';
 
 const colToIndex = (col: string): number => {
-  const c = String(col || '')
-    .toUpperCase()
-    .replace(/[^A-Z]/g, '');
+  const c = String(col || '').toUpperCase().replace(/[^A-Z]/g, '');
   if (!c) return 0;
 
   let n = 0;
@@ -40,7 +38,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
   const { overlay, modal } = overlayRef;
 
   const fileRow = makeEl('div', {}, { margin: '10px 0' }, [
-  makeEl('label', { for: 'excelFile', text: t('select_file') }, {}, []),
+    makeEl('label', { for: 'excelFile', text: t('select_file') }, {}, []),
     makeEl('input', {
       id: 'excelFile',
       type: 'file',
@@ -54,11 +52,16 @@ export const openExcelImportDialog = async (): Promise<void> => {
     {},
     { margin: '10px 0', display: 'none' },
     [
-  makeEl('label', { for: 'sheetSelect', text: t('sheet') }),
+      makeEl('label', { for: 'sheetSelect', text: t('sheet') }),
       makeEl('select', { id: 'sheetSelect' }, {}, []),
     ]
   );
 
+  // Name selection mode: single column OR two columns (first + last)
+  let nameMode: 'single' | 'two' = 'single';
+  let nameModeSelect: HTMLSelectElement | null = null;
+
+  // Name range row (now supports both single and dual column modes)
   const rangeRow = makeEl(
     'div',
     {},
@@ -67,9 +70,18 @@ export const openExcelImportDialog = async (): Promise<void> => {
       display: 'none',
       gap: '8px',
       alignItems: 'center',
+      flexWrap: 'wrap',
     },
+    []
+  );
+
+  // Single column controls (A + rows)
+  const singleColControls = makeEl(
+    'div',
+    {},
+    { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' },
     [
-  makeEl('label', { for: 'colInput', text: t('column_letter') }),
+      makeEl('label', { for: 'colInput', text: t('column_letter') }),
       makeEl('input', {
         id: 'colInput',
         type: 'text',
@@ -77,19 +89,91 @@ export const openExcelImportDialog = async (): Promise<void> => {
         placeholder: 'e.g. A',
         size: '3',
       }),
-  makeEl('label', { for: 'rowFrom', text: t('rows_from') }),
+    ]
+  );
+
+  // Two columns controls (First + Last with customizable separator)
+  const dualColControls = makeEl(
+    'div',
+    {},
+    {
+      display: 'none',
+      gap: '8px',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+    },
+    [
+      makeEl('label', { for: 'firstColInput', text: t('first_name_column') || 'First name column' }),
       makeEl('input', {
-        id: 'rowFrom',
-        type: 'number',
-        min: '1',
-        value: '2',
+        id: 'firstColInput',
+        type: 'text',
+        value: 'A',
+        placeholder: 'e.g. A',
+        size: '3',
       }),
-  makeEl('label', { for: 'rowTo', text: t('to') }),
+      makeEl('label', { for: 'lastColInput', text: t('last_name_column') || 'Last name column' }),
+      makeEl('input', {
+        id: 'lastColInput',
+        type: 'text',
+        value: 'B',
+        placeholder: 'e.g. B',
+        size: '3',
+      }),
+      makeEl('label', { for: 'nameSepInput', text: t('name_separator') || 'Separator' }),
+      makeEl('input', {
+        id: 'nameSepInput',
+        type: 'text',
+        value: ' ',
+        placeholder: 'e.g. space, comma',
+        size: '3',
+      }),
+    ]
+  );
+
+  // Row range and header
+  const rowsAndHeaderControls = makeEl(
+    'div',
+    {},
+    { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' },
+    [
+      makeEl('label', { for: 'rowFrom', text: t('rows_from') }),
+      makeEl('input', { id: 'rowFrom', type: 'number', min: '1', value: '1' }),
+      makeEl('label', { for: 'rowTo', text: t('to') }),
       makeEl('input', { id: 'rowTo', type: 'number', min: '1', value: '100' }),
-  makeEl('label', { for: 'hasHeader', text: t('header_row_skip') }),
+      makeEl('label', { for: 'hasHeader', text: t('header_row_skip') }),
       makeEl('input', { id: 'hasHeader', type: 'checkbox', checked: 'true' }),
     ]
   );
+
+  // Name mode selector
+  const nameModeRow = makeEl(
+    'div',
+    {},
+    { display: 'none', gap: '8px', alignItems: 'center', marginTop: '8px' },
+    [
+      makeEl('label', { for: 'nameMode', text: t('name_mode') || 'Name mode' }),
+      (nameModeSelect = makeEl(
+        'select',
+        { id: 'nameMode' },
+        { padding: '6px', borderRadius: '6px', border: '1px solid #d1d5db' },
+        [
+          makeEl('option', {
+            value: 'single',
+            text: t('single_column') || 'Single column',
+          }),
+          makeEl('option', {
+            value: 'two',
+            text: t('two_columns_first_last') || 'Two columns (First + Last)',
+          }),
+        ]
+      ) as HTMLSelectElement),
+    ]
+  );
+
+  rangeRow.appendChild(nameModeRow);
+  rangeRow.appendChild(singleColControls);
+  rangeRow.appendChild(dualColControls);
+  rangeRow.appendChild(rowsAndHeaderControls);
 
   const previewTitle = makeEl(
     'div',
@@ -176,11 +260,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
   let priceCodeMappingState: Map<string, string> = new Map();
 
   const normalizeNameKey = (value: string): string =>
-    String(value || '')
-      .normalize('NFC')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .toLowerCase();
+    String(value || '').normalize('NFC').replace(/\s+/g, ' ').trim().toLowerCase();
 
   const readFile = async (file: File) => {
     const buf = await file.arrayBuffer();
@@ -211,21 +291,18 @@ export const openExcelImportDialog = async (): Promise<void> => {
     table = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true });
 
     rangeRow.style.display = '';
+    nameModeRow.style.display = '';
     previewTitle.style.display = '';
     previewBox.style.display = '';
 
     if (ws['!ref']) {
       const { firstRow, lastRow } = parseA1Ref(ws['!ref']);
-      const hasHeaderEl = rangeRow.querySelector(
-        '#hasHeader'
-      ) as HTMLInputElement;
+      const hasHeaderEl = rangeRow.querySelector('#hasHeader') as HTMLInputElement;
       const rowFromEl = rangeRow.querySelector('#rowFrom') as HTMLInputElement;
       const rowToEl = rangeRow.querySelector('#rowTo') as HTMLInputElement;
 
       const hasHeaderChecked = !!hasHeaderEl.checked;
-      rowFromEl.value = String(
-        hasHeaderChecked ? Math.max(2, firstRow) : firstRow
-      );
+      rowFromEl.value = String(hasHeaderChecked ? Math.max(2, firstRow) : firstRow);
       rowToEl.value = String(lastRow);
     }
 
@@ -233,9 +310,25 @@ export const openExcelImportDialog = async (): Promise<void> => {
   };
 
   const getNameColumnLetter = (): string => {
-    const value = (rangeRow.querySelector('#colInput') as HTMLInputElement).value || 'A';
-    const cleaned = value.toUpperCase().replace(/[^A-Z]/g, '');
-    return cleaned || 'A';
+    const el = rangeRow.querySelector('#colInput') as HTMLInputElement;
+    const value = (el?.value || 'A').toUpperCase().replace(/[^A-Z]/g, '');
+    return value || 'A';
+  };
+
+  const getFirstNameColumnLetter = (): string => {
+    const el = rangeRow.querySelector('#firstColInput') as HTMLInputElement;
+    return (el?.value || 'A').toUpperCase().replace(/[^A-Z]/g, '');
+  };
+
+  const getLastNameColumnLetter = (): string => {
+    const el = rangeRow.querySelector('#lastColInput') as HTMLInputElement;
+    return (el?.value || 'B').toUpperCase().replace(/[^A-Z]/g, '');
+  };
+
+  const getNameSeparator = (): string => {
+    const el = rangeRow.querySelector('#nameSepInput') as HTMLInputElement;
+    // Default to single space if empty
+    return (el?.value ?? ' ').toString();
   };
 
   const getRowStart = (): number =>
@@ -252,11 +345,14 @@ export const openExcelImportDialog = async (): Promise<void> => {
       ? priceCodeColumnInput.value.trim().toUpperCase().replace(/[^A-Z]/g, '')
       : '';
 
+  const sanitizeColInput = (input: HTMLInputElement | null) => {
+    if (!input) return;
+    input.value = input.value.toUpperCase().replace(/[^A-Z]/g, '');
+  };
+
   const extractEntriesFromRange = (): ExtractedEntry[] => {
     if (!table.length) return [];
 
-    const colLetter = getNameColumnLetter();
-    const colIndex = colToIndex(colLetter);
     const startRow = Math.max(1, getRowStart()) - 1;
     const endRow = Math.max(startRow, getRowEnd() - 1);
     const skipHeader = hasHeaderRow();
@@ -266,24 +362,67 @@ export const openExcelImportDialog = async (): Promise<void> => {
 
     const entries: ExtractedEntry[] = [];
 
-    for (let r = startRow; r <= endRow && r < table.length; r++) {
-      if (skipHeader && r === startRow) continue;
+    if (nameMode === 'single') {
+      const colLetter = getNameColumnLetter();
+      const colIndex = colToIndex(colLetter);
 
-      const row = (table[r] || []) as unknown[];
-      const cell = row[colIndex];
-      if (cell == null) continue;
+      for (let r = startRow; r <= endRow && r < table.length; r++) {
+        if (skipHeader && r === startRow) continue;
 
-      const priceValue =
-        priceIndex != null ? String(row[priceIndex] ?? '').trim() : undefined;
+        const row = (table[r] || []) as unknown[];
+        const cell = row[colIndex];
+        if (cell == null) continue;
 
-      const items = String(cell)
-        .split(/\r?\n+/)
-        .map((s) => s.trim())
-        .filter(Boolean);
+        const priceValue =
+          priceIndex != null ? String(row[priceIndex] ?? '').trim() : undefined;
 
-      for (const item of items) {
+        const items = String(cell)
+          .split(/\r?\n+/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+
+        for (const item of items) {
+          entries.push({
+            name: item,
+            priceSource: priceIndex != null ? priceValue : undefined,
+          });
+        }
+      }
+    } else {
+      // nameMode === 'two'
+      const firstColLetter = getFirstNameColumnLetter();
+      const lastColLetter = getLastNameColumnLetter();
+      const firstIndex = colToIndex(firstColLetter);
+      const lastIndex = colToIndex(lastColLetter);
+      const sep = getNameSeparator();
+
+      for (let r = startRow; r <= endRow && r < table.length; r++) {
+        if (skipHeader && r === startRow) continue;
+
+        const row = (table[r] || []) as unknown[];
+        const first = row[firstIndex];
+        const last = row[lastIndex];
+
+        const firstStr = String(first ?? '').trim();
+        const lastStr = String(last ?? '').trim();
+
+        // Skip if both are empty
+        if (!firstStr && !lastStr) continue;
+
+        const combined = [firstStr, lastStr]
+          .filter((s) => s && s.length)
+          .join(sep || ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        if (!combined) continue;
+
+        const priceValue =
+          priceIndex != null ? String(row[priceIndex] ?? '').trim() : undefined;
+
+        // Unlike single mode, we don't split on newlines because columns carry single values
         entries.push({
-          name: item,
+          name: combined,
           priceSource: priceIndex != null ? priceValue : undefined,
         });
       }
@@ -360,7 +499,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
 
     const colLetter = getPriceColumnLetter();
     if (!colLetter) {
-    priceCodeNotice.textContent = t('enter_pricecode_column_letter');
+      priceCodeNotice.textContent = t('enter_pricecode_column_letter');
       priceCodeMappingState.clear();
       updateImportButtonState();
       return;
@@ -368,13 +507,13 @@ export const openExcelImportDialog = async (): Promise<void> => {
 
     const uniqueValues = getUniquePriceValues();
     if (!uniqueValues.length) {
-  priceCodeNotice.textContent = t('no_values_in_column');
+      priceCodeNotice.textContent = t('no_values_in_column');
       priceCodeMappingState.clear();
       updateImportButtonState();
       return;
     }
 
-  priceCodeNotice.textContent = t('map_each_value');
+    priceCodeNotice.textContent = t('map_each_value');
 
     const nextState = new Map<string, string>();
     uniqueValues.forEach((value) => {
@@ -429,7 +568,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
         ]
       );
 
-  priceCodeMappingContainer!.appendChild(row);
+      priceCodeMappingContainer!.appendChild(row);
     });
 
     updateImportButtonState();
@@ -560,7 +699,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
         makeEl(
           'div',
           {},
-          { display: 'flex', gap: '8px', alignItems: 'center' },
+          { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' },
           [
             makeEl('label', { for: 'priceCodeColumn', text: t('column_for_pricecode') }),
             priceCodeColumnInput,
@@ -594,8 +733,10 @@ export const openExcelImportDialog = async (): Promise<void> => {
     syncVisibility();
   };
 
+  // Initial button state
   updateImportButtonState();
 
+  // Load price code options
   void (async () => {
     try {
       const options = await getPriceCodeOptions();
@@ -608,14 +749,15 @@ export const openExcelImportDialog = async (): Promise<void> => {
     }
   })();
 
+  // File selection
   (fileRow.querySelector('#excelFile') as HTMLInputElement).addEventListener(
     'change',
     async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
       if (!file) return;
 
-  importBtn.disabled = true;
-  importBtn.textContent = t('reading_file');
+      importBtn.disabled = true;
+      importBtn.textContent = t('reading_file');
 
       try {
         await readFile(file);
@@ -623,13 +765,16 @@ export const openExcelImportDialog = async (): Promise<void> => {
         refreshPreview();
       } catch (err) {
         importBtn.textContent = t('start_import');
-        alert(t('failed_read_file', { msg: (err as Error).message || String(err) }));
+        alert(
+          t('failed_read_file', { msg: (err as Error).message || String(err) })
+        );
       } finally {
         updateImportButtonState();
       }
     }
   );
 
+  // Sheet selection
   (sheetRow.querySelector('#sheetSelect') as HTMLSelectElement).addEventListener(
     'change',
     (e) => {
@@ -637,7 +782,24 @@ export const openExcelImportDialog = async (): Promise<void> => {
     }
   );
 
-  rangeRow.addEventListener('input', () => {
+  // Name mode change
+  nameModeSelect?.addEventListener('change', () => {
+    nameMode = (nameModeSelect!.value as 'single' | 'two') || 'single';
+    singleColControls.style.display = nameMode === 'single' ? 'flex' : 'none';
+    dualColControls.style.display = nameMode === 'two' ? 'flex' : 'none';
+    refreshPreview();
+  });
+
+  // Range inputs
+  rangeRow.addEventListener('input', (ev) => {
+    const target = ev.target as HTMLInputElement | HTMLSelectElement;
+    if (!target) return;
+
+    // Sanitize column inputs
+    if (target.id === 'colInput') sanitizeColInput(target as HTMLInputElement);
+    if (target.id === 'firstColInput') sanitizeColInput(target as HTMLInputElement);
+    if (target.id === 'lastColInput') sanitizeColInput(target as HTMLInputElement);
+
     try {
       refreshPreview();
     } catch {
@@ -674,7 +836,9 @@ export const openExcelImportDialog = async (): Promise<void> => {
           return;
         }
 
-        const missing = uniqueValues.filter((value) => !priceCodeMappingState.get(value));
+        const missing = uniqueValues.filter(
+          (value) => !priceCodeMappingState.get(value)
+        );
         if (missing.length) {
           alert(t('make_mapping'));
           return;
@@ -686,10 +850,10 @@ export const openExcelImportDialog = async (): Promise<void> => {
     const controller = new AbortController();
 
     try {
-  importBtn.disabled = true;
-  importBtn.textContent = t('importing_count', { count: names.length });
+      importBtn.disabled = true;
+      importBtn.textContent = t('importing_count', { count: names.length });
 
-  progress = showProgressModal(names.length, () => controller.abort());
+      progress = showProgressModal(names.length, () => controller.abort());
 
       const priceCodeResolver = requiresPriceCode()
         ? priceMode === 'single'
@@ -708,7 +872,7 @@ export const openExcelImportDialog = async (): Promise<void> => {
         priceCodeResolver,
       });
 
-  progress.finish();
+      progress.finish();
       progress = null;
       overlay.remove();
       showReportModal(report);

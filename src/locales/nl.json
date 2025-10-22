@@ -61,5 +61,12 @@
   "failed_load_pricecodes": "Laden van prijscodes mislukt: {msg}",
 
   "import_excel": "Excel importeren",
-  "import_paste": "Klembord importeren"
+  "import_paste": "Klembord importeren",
+
+  "single_column": "Enkele kolom (alleen namen)",
+  "two_columns_first_last": "Twee kolommen (voor + achternaam)",
+  "name_mode": "Naam modus:",
+  "first_name_column": "Kolom voor voornaam:",
+  "last_name_column": "Kolom voor achternaam:",
+  "name_separator": "Naam scheidingsteken:"
 }
