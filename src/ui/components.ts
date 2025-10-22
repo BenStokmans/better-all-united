@@ -31,6 +31,42 @@ export const createButton = ({
   return button;
 };
 
+export const createListItem = (children: Array<HTMLElement | string>): HTMLLIElement => {
+  const listItem = document.createElement("li");
+  children.forEach(child => {
+    if (typeof child === "string") {
+      listItem.appendChild(document.createTextNode(child));
+    } else {
+      listItem.appendChild(child);
+    }
+  });
+  return listItem;
+};
+
+export const createAnchorButton = ({
+  id,
+  text,
+  onClick,
+  styles = {},
+  attributes = {},
+}: ButtonConfig): HTMLAnchorElement => {
+  const button = document.createElement("a");
+  button.id = id;
+  button.textContent = text;
+  button.href = "#";
+  button.classList.add("btn", "btn-green");
+  
+  Object.entries(attributes).forEach(([k, v]) => button.setAttribute(k, v));
+  Object.assign(button.style, styles);
+
+  button.addEventListener("click", (e) => {
+    e.preventDefault();
+    onClick(e);
+  });
+  
+  return button;
+};
+
 export const createInputButton = ({
   id,
   text,

@@ -74,5 +74,18 @@
   "columns_for_pricecode": "Kolommen voor prijscode (1 of meer):",
   "too_many_combinations": "Te veel combinaties",
   "narrow_selection_or_values": "Beperk uw selectie (rijen/kolommen) of verminder het aantal unieke waarden.",
-  "fast_search": "Snel zoeken"
+  "fast_search": "Snel zoeken",
+  "rebook_transaction": "Omboeken",
+  "description": "Beschrijving",
+  "amount": "Bedrag",
+  "from_date": "Van datum",
+  "to_date": "Tot datum",
+  "main_account_code": "Grootboekrekening",
+  "rebook_account": "Afboekrekening",
+  "rebook_created": "Omboeking voltooid",
+  "rebook_missing_fields": "Vul alle velden in om een omboeking te maken.",
+  "rebook_no_session": "Kan sessie niet vinden. Vernieuw de pagina en probeer het opnieuw.",
+  "rebook_next_year": "+1 jaar",
+  "rebook_previous_year": "-1 jaar",
+  "done": "Klaar"
 }

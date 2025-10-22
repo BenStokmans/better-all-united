@@ -9,6 +9,7 @@ Een kleine browserextensie die de All United-website verbetert door extra import
 - Excel-import ondersteuning (gebruikt `xlsx`) voor evenementen
 - Verbeterde naamzoek functie voor deelnemers en factuur paginas
 - Snelle zoekfunctie voor ledenlijsten
+- Makkelijk omboeken van transacties
 
 ### Installatie
 - Download de laatste release (better-all-united-vX.zip) van de [GitHub-pagina](https://github.com/BenStokmans/better-all-united/releases/latest)

@@ -21,7 +21,7 @@ const buildFindPayload = (searchTerm: string): string => {
   return body.toString();
 };
 
-export const performSearch = async (
+export const performMemberSearch = async (
   searchTerm: string,
   storedSessionId?: string | null,
   signal?: AbortSignal | null,
@@ -48,6 +48,55 @@ export const performSearch = async (
   if (!res.ok) {
     throw new Error(
       `Search for "${searchTerm}" failed: ${res.status} ${res.statusText}`
+    );
+  }
+
+  const data = await res.json();
+  if (!Array.isArray(data?.options)) return [];
+
+  return data.options.map((option: { value: unknown; label: unknown }) => ({
+    value: String(option?.value ?? ""),
+    label: decodeHtml(String(option?.label ?? "")),
+  }));
+};
+
+const buildAccountFindPayload = (searchTerm: string): string => {
+  // Encoded PHP serialized find-data that matches the AllUnited account lookup
+  const findData =
+    "YTo0OntzOjU6ImZpZWxkIjtzOjExOiJhY2NvdW50Y29kZSI7czo1OiJxdWVyeSI7czoxMDoiZl9hY2NvdW50cyI7czo1OiJsaW1pdCI7czoyOiIxMCI7czo2OiJmaWVsZHMiO3M6MTk6ImFjY291bnRjb2RlO2FjY291bnQiO30=";
+  const body = new URLSearchParams();
+  body.set("find-data", findData);
+  body.set("find-value", searchTerm);
+  return body.toString();
+};
+
+export const performAccountSearch = async (
+  searchTerm: string,
+  storedSessionId?: string | null,
+  signal?: AbortSignal | null,
+): Promise<Array<{ value: string; label: string }>> => {
+  const sessionId = getSessionId() || storedSessionId;
+  if (!sessionId) throw new Error("Session ID not found.");
+
+  const url = `${location.origin}/_ajax.php?sessionid=${encodeURIComponent(
+    sessionId
+  )}&find-field&time=${Date.now()}`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "x-requested-with": "XMLHttpRequest",
+      accept: "*/*",
+    },
+    credentials: "include",
+    body: buildAccountFindPayload(searchTerm),
+    signal,
+  });
+
+  if (!res.ok) {
+    throw new Error(
+      `Account search for "${searchTerm}" failed: ${res.status} ${res.statusText}`
     );
   }
 

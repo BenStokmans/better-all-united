@@ -4,7 +4,7 @@ import { normalize } from "./utils/text";
 import {
   stripLabelMetadata,
 } from "./utils/names";
-import { performSearch } from "./utils/session";
+import { performMemberSearch } from "./utils/session";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -332,7 +332,7 @@ const performMultiTermSearch = async (fullName: string): Promise<SearchOption[]>
   const terms = fullName.trim().split(/\s+/);
   if (terms.length < 2) {
     try {
-      return await performSearch(fullName, storedSessionId);
+      return await performMemberSearch(fullName, storedSessionId);
     } catch (e) {
       console.error("[Better AllUnited] performSearch error", e);
       return [];
@@ -340,7 +340,7 @@ const performMultiTermSearch = async (fullName: string): Promise<SearchOption[]>
   }
 
   const tasks = terms.map(t => {
-    return performSearch(t, storedSessionId).catch(() => [] as SearchOption[]);
+    return performMemberSearch(t, storedSessionId).catch(() => [] as SearchOption[]);
   });
   const results = await Promise.all(tasks);
 

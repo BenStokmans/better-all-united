@@ -1,7 +1,8 @@
 import { t } from "./i18n";
-import { createInputButton, createToolbarCheckbox } from "./ui/components";
+import { createAnchorButton, createInputButton, createListItem, createToolbarCheckbox } from "./ui/components";
 import { openExcelImportDialog } from "./ui/excel-import";
 import { openPasteImportDialog } from "./ui/paste-import";
+import { openRebookDialog } from "./ui/rebook";
 import { onElementAvailable, onElementCreated, ready } from "./utils/dom";
 import { getSessionId } from "./utils/session";
 
@@ -74,6 +75,25 @@ const attachCourseMembersButtons = (): void => {
   });
 };
 
+const attachRebookButton = (): void => {
+  const selector = 'form#form2118';
+  onElementAvailable(selector, () => {
+    const targetContainer = document.querySelector("div.tmenuLeft > ul");
+    if (!targetContainer) return;
+
+    const button = createAnchorButton({
+      id: "rebook-transaction",
+      text: t("rebook_transaction"),
+      onClick: () => {
+        openRebookDialog();
+      },
+    });
+
+    const listItem = createListItem([button]);
+
+    targetContainer.appendChild(listItem);
+  });
+}
 
 
 function injectInpageScript() {
@@ -103,6 +123,7 @@ try {
 ready(() => {
   attachCourseMembersButtons();
   attachFastSearchButtons();
+  attachRebookButton();
 });
 
 // If we can determine a session id here, broadcast the current fast-search state to all iframes
