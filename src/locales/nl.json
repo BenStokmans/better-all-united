@@ -68,5 +68,10 @@
   "name_mode": "Naam modus:",
   "first_name_column": "Kolom voor voornaam:",
   "last_name_column": "Kolom voor achternaam:",
-  "name_separator": "Naam scheidingsteken:"
+  "name_separator": "Naam scheidingsteken:",
+  "add_column": "Kolom toevoegen",
+  "remove": "Verwijderen",
+  "columns_for_pricecode": "Kolommen voor prijscode (1 of meer):",
+  "too_many_combinations": "Te veel combinaties",
+  "narrow_selection_or_values": "Beperk uw selectie (rijen/kolommen) of verminder het aantal unieke waarden."
 }

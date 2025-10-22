@@ -9,6 +9,13 @@ Een kleine browserextensie die de All United-website verbetert door extra import
 - Excel-import ondersteuning (gebruikt `xlsx`) voor evenementen
 - Meer in de toekomst?
 
+### Installatie
+- Download de laatste release (better-all-united-vX.zip) van de [GitHub-pagina](https://github.com/BenStokmans/better-all-united/releases/latest)
+- Unzip het gedownloade bestand
+- Open de extensiepagina van je browser (bijv. Chrome: `chrome://extensions/`)
+- Zet Developer mode aan
+- Klik op "Load unpacked" en selecteer de uitgepakte map (de map met `manifest.json`)
+
 ### Vereisten
 
 - Node.js (aanbevolen >= 18)
