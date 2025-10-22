@@ -7,6 +7,7 @@ A small browser extension that enhances the All United website by adding improve
 ### Features
 
 - Excel import support (uses `xlsx`) for event participants
+- Improved name search functionality
 - More soon?
 
 ### Requirements

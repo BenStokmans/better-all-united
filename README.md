@@ -7,6 +7,7 @@ Een kleine browserextensie die de All United-website verbetert door extra import
 ### Functies
 
 - Excel-import ondersteuning (gebruikt `xlsx`) voor evenementen
+- Verbeterde naamzoek functie
 - Meer in de toekomst?
 
 ### Installatie
