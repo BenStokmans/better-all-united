@@ -1,46 +1,7 @@
 import type { ContactSearchResult } from "../types";
 import { performSearch } from "../utils/session";
-import { parseName, pickBestOption } from "../utils/names";
-
-const normalize = (s: string): string =>
-  String(s || "")
-    .normalize("NFC")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
-
-const stripLabelMetadata = (label: string): string =>
-  label
-    .replace(/\([^)]*\)/g, " ")
-    .replace(/\[[^\]]*\]/g, " ")
-    .replace(/\s+-\s+.*$/, " ");
-
-const extractLabelLast = (label: string): string => {
-  const raw = String(label || "");
-  const normalized = normalize(raw);
-  if (!normalized) return "";
-
-  const commaIdx = normalized.indexOf(",");
-  if (commaIdx !== -1) {
-    return normalized.slice(0, commaIdx).trim();
-  }
-
-  const cleaned = normalize(stripLabelMetadata(raw));
-  if (!cleaned) return "";
-
-  const { lastName } = parseName(cleaned);
-  return normalize(lastName);
-};
-
-const includesFirst = (label: string, firstName: string): boolean => {
-  const normalizedLabel = normalize(label);
-  const nameParts = normalize(firstName).split(/\s+/).filter(Boolean);
-  if (nameParts.length === 0) return true;
-
-  const labelTokens = normalizedLabel.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
-
-  return nameParts.every((part) => labelTokens.some((t) => t === part));
-};
+import { parseName, pickBestOption, extractLabelLast, includesFirst } from "../utils/names";
+import { normalize } from "../utils/text";
 
 export const findContactForName = async (
   fullName: string,

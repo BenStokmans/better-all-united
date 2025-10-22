@@ -86,3 +86,17 @@ export interface ModalRef {
   overlay: HTMLElement;
   modal: HTMLElement;
 }
+
+// Allow access to jQuery globals on window in injected scripts
+declare global {
+  interface Window {
+    jQuery?: any;
+    $?: any;
+  }
+}
+
+// Ambient globals for extension APIs (allow direct use of `chrome` / `browser`)
+declare const chrome: any;
+declare const browser: any;
+
+export {};

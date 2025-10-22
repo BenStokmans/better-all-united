@@ -37,6 +37,34 @@ const attachCourseMembersButtons = (): void => {
   });
 };
 
+// Setup request interceptor for enhanced multi-word search
+
+
+// src/content.ts
+function injectInpageScript() {
+  const script = document.createElement("script");
+  // Use a safe access to window.chrome to avoid TypeScript "Cannot find name 'chrome'"
+  const runtime = (window as any).chrome?.runtime;
+  if (runtime && typeof runtime.getURL === "function") {
+    script.src = runtime.getURL("dist/interceptor.js");
+  } else {
+    throw new Error("Cannot access chrome.runtime to get script URL");
+  }
+  script.type = "text/javascript";
+  // Clean up after load to avoid leaking DOM nodes
+  script.onload = () => script.remove();
+  (document.documentElement || document.head || document.body).appendChild(
+    script
+  );
+}
+
+try {
+  injectInpageScript();
+} catch (e) {
+  // eslint-disable-next-line no-console
+  console.error("[Better AllUnited] Failed to inject interceptor.js", e);
+}
+
 ready(() => {
   attachCourseMembersButtons();
 });

@@ -19,6 +19,7 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "fast-levenshtein": "^3.0.0"
   }
 }

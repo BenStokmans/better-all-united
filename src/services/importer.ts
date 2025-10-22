@@ -1,16 +1,10 @@
 import type { ImportReport, ImportOptions, PriceCodeOption } from "../types";
 import { findContactForName } from "./search";
 import { sleep } from "../utils/dom";
+import { normalize } from "../utils/text";
 
 const contactInputSelector =
   'input.find-field[name*="course[_subforms_][coursemembers]"][name$="[contactid]"]';
-
-const normalize = (value: string): string =>
-  String(value || "")
-    .normalize("NFC")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
 
 const clickAddRow = async (): Promise<void> => {
   const btns = Array.from(document.querySelectorAll("input")).filter(

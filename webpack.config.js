@@ -1,7 +1,10 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/main.ts',
+  entry: {
+    bundle: './src/main.ts',
+    interceptor: './src/interceptor.ts',
+  },
   module: {
     rules: [
       {
@@ -14,9 +17,10 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
+   output: {
+    filename: "[name].js",
+    path: path.resolve(__dirname, "dist"),
+    clean: true,
   },
   devtool: 'source-map',
 };

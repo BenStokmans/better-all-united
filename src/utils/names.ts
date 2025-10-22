@@ -1,5 +1,6 @@
 import type { ParsedName, SearchOption } from "../types";
 import { decodeHtml } from "./dom";
+import { normalize } from "./text";
 
 export const parseName = (full: string): ParsedName => {
   const parts = String(full || "")
@@ -16,19 +17,13 @@ export const parseName = (full: string): ParsedName => {
   return { firstName, lastName };
 };
 
-const normalizeDecoded = (s: string): string =>
-  s.normalize("NFC").toLowerCase().replace(/\s+/g, " ").trim();
-
-const normalize = (s: string): string =>
-  normalizeDecoded(decodeHtml(String(s || "")));
-
-const stripLabelMetadata = (label: string): string =>
+export const stripLabelMetadata = (label: string): string =>
   label
     .replace(/\([^)]*\)/g, " ")
     .replace(/\[[^\]]*\]/g, " ")
     .replace(/\s+-\s+.*$/, " ");
 
-const extractLabelLast = (label: string): string => {
+export const extractLabelLast = (label: string): string => {
   const raw = String(label || "");
   const normalized = normalize(raw);
   if (!normalized) return "";
@@ -45,19 +40,27 @@ const extractLabelLast = (label: string): string => {
   return normalize(lastName);
 };
 
-const includesFirst = (label: string, firstName: string): boolean => {
+export const includesFirst = (label: string, firstName: string): boolean => {
   const normalizedLabel = normalize(label);
   const nameParts = normalize(firstName).split(/\s+/).filter(Boolean);
 
   if (nameParts.length === 0) return true;
 
-  // Tokenize the label using Unicode-aware character classes so letters
-  // with accents (e.g. è, ü) are treated as part of words. We split on any
-  // run of non-letter/non-number characters. The `u` flag enables Unicode
-  // property escapes when available.
+  // Tokenize using Unicode-aware character classes so accented letters are
+  // treated as word characters. Split on runs of non-letter/non-number.
   const labelTokens = normalizedLabel.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 
   return nameParts.every((part) => labelTokens.some((t) => t === part));
+};
+
+export const splitTokens = (s: string): string[] =>
+  normalize(s).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+
+export const tokensAfterLastComma = (label: string): string[] => {
+  const noMeta = stripLabelMetadata(label);
+  const lastComma = noMeta.lastIndexOf(",");
+  const tail = lastComma >= 0 ? noMeta.slice(lastComma + 1) : noMeta;
+  return splitTokens(tail);
 };
 
 export const pickBestOption = (
@@ -67,17 +70,15 @@ export const pickBestOption = (
   const targetLast = normalize(lastName);
 
   // Perfect: last equals, and label contains every token of firstName
-  const perfect = options.filter(
+  const perfect = options.find(
     (o) =>
       extractLabelLast(o.label) === targetLast &&
       includesFirst(o.label, firstName)
   );
-  if (perfect.length === 1) return perfect[0];
+  if (perfect) return perfect;
 
   // Unique last-name match
-  const lastOnly = options.filter(
-    (o) => extractLabelLast(o.label) === targetLast
-  );
+  const lastOnly = options.filter((o) => extractLabelLast(o.label) === targetLast);
   if (lastOnly.length === 1) return lastOnly[0];
 
   return null;
@@ -99,7 +100,6 @@ export const parseBySeparator = (
   } else if (sep === "enter") {
     parts = trimmed.split(/\r?\n+/);
   } else {
-    // auto-detect: pick the separator with the highest count
     const counts = {
       enter: (trimmed.match(/\r?\n/g) || []).length,
       tab: (trimmed.match(/\t/g) || []).length,
@@ -114,15 +114,12 @@ export const parseBySeparator = (
 
   const names = parts.map((s) => s.trim()).filter(Boolean);
 
-  // de-duplicate keep order
   const seen = new Set<string>();
   const out: string[] = [];
 
   for (const n of names) {
     const decoded = decodeHtml(String(n || ""));
-    // Normalize Unicode and case for deduplication to avoid losing
-    // different composed/decomposed forms or case-only differences.
-    const k = normalizeDecoded(decoded);
+    const k = normalize(decoded);
     if (seen.has(k)) continue;
     seen.add(k);
     out.push(decoded);
