@@ -1,6 +1,6 @@
 export const ready = (fn: () => void): void => {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', fn, { once: true });
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", fn, { once: true });
   } else {
     fn();
   }
@@ -38,8 +38,8 @@ export const makeEl = (
   const el = document.createElement(tag);
 
   Object.entries(props).forEach(([k, v]) => {
-    if (k === 'class') el.className = v;
-    else if (k === 'text') el.textContent = v;
+    if (k === "class") el.className = v;
+    else if (k === "text") el.textContent = v;
     else el.setAttribute(k, v);
   });
 
@@ -47,7 +47,7 @@ export const makeEl = (
 
   (Array.isArray(children) ? children : [children]).forEach((c) => {
     if (c == null) return;
-    el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    el.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
   });
 
   return el;
@@ -59,14 +59,14 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
     return true;
   } catch {
     // Fallback
-    const ta = document.createElement('textarea');
+    const ta = document.createElement("textarea");
     ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
     document.body.appendChild(ta);
     ta.select();
     try {
-      document.execCommand('copy');
+      document.execCommand("copy");
       return true;
     } catch {
       return false;
@@ -79,10 +79,10 @@ export const copyToClipboard = async (text: string): Promise<boolean> => {
 let decodeTextarea: HTMLTextAreaElement | null = null;
 
 export const decodeHtml = (value: string): string => {
-  if (!value) return '';
-  if (typeof document === 'undefined') return value;
+  if (!value) return "";
+  if (typeof document === "undefined") return value;
 
-  if (!decodeTextarea) decodeTextarea = document.createElement('textarea');
+  if (!decodeTextarea) decodeTextarea = document.createElement("textarea");
   decodeTextarea.innerHTML = value;
   return decodeTextarea.value;
 };

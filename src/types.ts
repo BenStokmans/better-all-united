@@ -14,7 +14,7 @@ export interface PriceCodeOption {
 }
 
 export interface ContactSearchResult {
-  status: 'found' | 'notFound' | 'ambiguous';
+  status: "found" | "notFound" | "ambiguous";
   data?: SearchOption;
   reason?: string;
   candidates?: string[];
@@ -51,18 +51,20 @@ export interface PriceCodeResolverContext {
 }
 
 export interface ProgressUpdate {
-  step: 'start' | 'complete' | 'cancel';
+  step: "start" | "complete" | "cancel";
   index: number;
   total: number;
   completed: number;
   name: string;
-  outcome?: 'found' | 'notFound' | 'ambiguous' | 'error';
+  outcome?: "found" | "notFound" | "ambiguous" | "error";
 }
 
 export interface ImportOptions {
   onProgress?: (update: ProgressUpdate) => void;
   signal?: AbortSignal | null;
-  priceCodeResolver?: (ctx: PriceCodeResolverContext) => string | null | undefined;
+  priceCodeResolver?: (
+    ctx: PriceCodeResolverContext
+  ) => string | null | undefined;
 }
 
 export interface ButtonConfig {

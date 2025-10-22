@@ -1,47 +1,45 @@
-import type { ParsedName, SearchOption } from '../types';
-import { decodeHtml } from './dom';
+import type { ParsedName, SearchOption } from "../types";
+import { decodeHtml } from "./dom";
 
 export const parseName = (full: string): ParsedName => {
-  const parts = String(full || '').trim().split(/\s+/);
+  const parts = String(full || "")
+    .trim()
+    .split(/\s+/);
 
   if (parts.length < 2) {
-    return { firstName: '', lastName: parts[0] || '' };
+    return { firstName: "", lastName: parts[0] || "" };
   }
 
   const lastName = parts.pop()!;
-  const firstName = parts.join(' ');
+  const firstName = parts.join(" ");
 
   return { firstName, lastName };
 };
 
 const normalizeDecoded = (s: string): string =>
-  s
-    .normalize('NFC')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim();
+  s.normalize("NFC").toLowerCase().replace(/\s+/g, " ").trim();
 
 const normalize = (s: string): string =>
-  normalizeDecoded(decodeHtml(String(s || '')));
+  normalizeDecoded(decodeHtml(String(s || "")));
 
 const stripLabelMetadata = (label: string): string =>
   label
-    .replace(/\([^)]*\)/g, ' ')
-    .replace(/\[[^\]]*\]/g, ' ')
-    .replace(/\s+-\s+.*$/, ' ');
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/\[[^\]]*\]/g, " ")
+    .replace(/\s+-\s+.*$/, " ");
 
 const extractLabelLast = (label: string): string => {
-  const raw = String(label || '');
+  const raw = String(label || "");
   const normalized = normalize(raw);
-  if (!normalized) return '';
+  if (!normalized) return "";
 
-  const commaIdx = normalized.indexOf(',');
+  const commaIdx = normalized.indexOf(",");
   if (commaIdx !== -1) {
     return normalized.slice(0, commaIdx).trim();
   }
 
   const cleaned = normalize(stripLabelMetadata(raw));
-  if (!cleaned) return '';
+  if (!cleaned) return "";
 
   const { lastName } = parseName(cleaned);
   return normalize(lastName);
@@ -57,9 +55,7 @@ const includesFirst = (label: string, firstName: string): boolean => {
   // with accents (e.g. è, ü) are treated as part of words. We split on any
   // run of non-letter/non-number characters. The `u` flag enables Unicode
   // property escapes when available.
-  const labelTokens = normalizedLabel
-    .split(/[^\p{L}\p{N}]+/u)
-    .filter(Boolean);
+  const labelTokens = normalizedLabel.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 
   return nameParts.every((part) => labelTokens.some((t) => t === part));
 };
@@ -89,18 +85,18 @@ export const pickBestOption = (
 
 export const parseBySeparator = (
   text: string,
-  sep: 'auto' | 'tab' | 'comma' | 'enter'
+  sep: "auto" | "tab" | "comma" | "enter"
 ): string[] => {
-  const trimmed = String(text || '').trim();
+  const trimmed = String(text || "").trim();
   if (!trimmed) return [];
 
   let parts: string[] = [];
 
-  if (sep === 'tab') {
+  if (sep === "tab") {
     parts = trimmed.split(/\t+/);
-  } else if (sep === 'comma') {
+  } else if (sep === "comma") {
     parts = trimmed.split(/\s*,\s*/);
-  } else if (sep === 'enter') {
+  } else if (sep === "enter") {
     parts = trimmed.split(/\r?\n+/);
   } else {
     // auto-detect: pick the separator with the highest count
@@ -111,7 +107,7 @@ export const parseBySeparator = (
     };
 
     const chosen = (Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0] ||
-      'enter') as 'enter' | 'tab' | 'comma';
+      "enter") as "enter" | "tab" | "comma";
 
     return parseBySeparator(trimmed, chosen);
   }
@@ -123,7 +119,7 @@ export const parseBySeparator = (
   const out: string[] = [];
 
   for (const n of names) {
-    const decoded = decodeHtml(String(n || ''));
+    const decoded = decodeHtml(String(n || ""));
     // Normalize Unicode and case for deduplication to avoid losing
     // different composed/decomposed forms or case-only differences.
     const k = normalizeDecoded(decoded);
