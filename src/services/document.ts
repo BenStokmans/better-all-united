@@ -78,10 +78,10 @@ export async function createDocument(
         `documentheader[_subforms_][documentline][${index}][accountcode]`,
         line.accountCode
       );
-        formData.append(
-          `documentheader[_subforms_][documentline][${index}][account]`,
-          ""
-        );
+      formData.append(
+        `documentheader[_subforms_][documentline][${index}][account]`,
+        ""
+      );
       formData.append(
         `documentheader[_subforms_][documentline][${index}][recon_id]`,
         ""
@@ -178,7 +178,8 @@ export async function createDocument(
 
         return {
           success: false,
-          error: parts.join(" | ") ||
+          error:
+            parts.join(" | ") ||
             "Document created but ID could not be extracted from response",
         };
       }
@@ -210,16 +211,14 @@ interface ErrorInfo {
 function extractErrorMessages(htmlResponse: string): ErrorInfo {
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlResponse, "text/html");
-  
+
   const errorInfo: ErrorInfo = {
     hasErrors: false,
     fieldErrors: [],
   };
 
   // 1. Extract system message block error
-  const systemMessageBlock = doc.getElementById(
-    "systemMessageBlock"
-  );
+  const systemMessageBlock = doc.getElementById("systemMessageBlock");
   if (systemMessageBlock) {
     const messageText = systemMessageBlock.textContent?.trim();
     if (messageText) {
@@ -232,14 +231,10 @@ function extractErrorMessages(htmlResponse: string): ErrorInfo {
   const invalidFields = doc.querySelectorAll(".invalidField");
   invalidFields.forEach((field) => {
     const fieldName =
-      field.getAttribute("name") ||
-      field.getAttribute("id") ||
-      "Unknown field";
+      field.getAttribute("name") || field.getAttribute("id") || "Unknown field";
     const fieldLabel =
-      field
-        .closest("td")
-        ?.querySelector(".text-label")
-        ?.textContent?.trim() || fieldName;
+      field.closest("td")?.querySelector(".text-label")?.textContent?.trim() ||
+      fieldName;
 
     const errorMessages = field
       .closest("tr")

@@ -46,10 +46,23 @@ export const openRebookDialog = async (): Promise<void> => {
   const descRow = makeEl(
     "div",
     {},
-    { display: "grid", gridTemplateColumns: "160px 1fr", alignItems: "center", gap: "8px" },
+    {
+      display: "grid",
+      gridTemplateColumns: "160px 1fr",
+      alignItems: "center",
+      gap: "8px",
+    },
     [
-      makeEl("label", { for: "rebook-desc", text: t("description") || "Description" }, labelStyle),
-      makeEl("input", { id: "rebook-desc", type: "text", value: "" }, inputStyle),
+      makeEl(
+        "label",
+        { for: "rebook-desc", text: t("description") || "Description" },
+        labelStyle
+      ),
+      makeEl(
+        "input",
+        { id: "rebook-desc", type: "text", value: "" },
+        inputStyle
+      ),
     ]
   );
 
@@ -57,10 +70,23 @@ export const openRebookDialog = async (): Promise<void> => {
   const amountRow = makeEl(
     "div",
     {},
-    { display: "grid", gridTemplateColumns: "160px 1fr", alignItems: "center", gap: "8px" },
+    {
+      display: "grid",
+      gridTemplateColumns: "160px 1fr",
+      alignItems: "center",
+      gap: "8px",
+    },
     [
-      makeEl("label", { for: "rebook-amount", text: t("amount") || "Amount" }, labelStyle),
-      makeEl("input", { id: "rebook-amount", type: "number", step: "0.01", value: "0" }, inputStyle),
+      makeEl(
+        "label",
+        { for: "rebook-amount", text: t("amount") || "Amount" },
+        labelStyle
+      ),
+      makeEl(
+        "input",
+        { id: "rebook-amount", type: "number", step: "0.01", value: "0" },
+        inputStyle
+      ),
     ]
   );
 
@@ -68,13 +94,27 @@ export const openRebookDialog = async (): Promise<void> => {
   const fromRow = makeEl(
     "div",
     {},
-    { display: "grid", gridTemplateColumns: "160px 1fr", alignItems: "center", gap: "8px" },
+    {
+      display: "grid",
+      gridTemplateColumns: "160px 1fr",
+      alignItems: "center",
+      gap: "8px",
+    },
     [
-      makeEl("label", { for: "rebook-from", text: t("from_date") || "From" }, labelStyle),
+      makeEl(
+        "label",
+        { for: "rebook-from", text: t("from_date") || "From" },
+        labelStyle
+      ),
       makeEl(
         "div",
         {},
-        { display: "grid", gridTemplateColumns: "1fr 140px auto auto", gap: "8px", alignItems: "center" },
+        {
+          display: "grid",
+          gridTemplateColumns: "1fr 140px auto auto",
+          gap: "8px",
+          alignItems: "center",
+        },
         [
           makeEl("input", { id: "rebook-from", type: "date" }, smallInputStyle),
           makeEl("input", { id: "rebook-to", type: "date" }, smallInputStyle),
@@ -83,28 +123,48 @@ export const openRebookDialog = async (): Promise<void> => {
             text: t("rebook_previous_year") || "-1y",
             onClick: (e) => {
               e.preventDefault();
-              const from = form.querySelector("#rebook-from") as HTMLInputElement | null;
-              const to = form.querySelector("#rebook-to") as HTMLInputElement | null;
+              const from = form.querySelector(
+                "#rebook-from"
+              ) as HTMLInputElement | null;
+              const to = form.querySelector(
+                "#rebook-to"
+              ) as HTMLInputElement | null;
               if (!from || !to) return;
               const parts = parseDateParts(from.value);
               if (!parts) return;
               to.value = safeSetYear(parts.y - 1, parts.m, parts.d);
             },
-            styles: { padding: "6px 10px", borderRadius: "6px", background: "#fff", color: "#334155", border: "1px solid #e6eef3" },
+            styles: {
+              padding: "6px 10px",
+              borderRadius: "6px",
+              background: "#fff",
+              color: "#334155",
+              border: "1px solid #e6eef3",
+            },
           }),
           createButton({
             id: "rebook-to-next-year",
             text: t("rebook_next_year") || "+1y",
             onClick: (e) => {
               e.preventDefault();
-              const from = form.querySelector("#rebook-from") as HTMLInputElement | null;
-              const to = form.querySelector("#rebook-to") as HTMLInputElement | null;
+              const from = form.querySelector(
+                "#rebook-from"
+              ) as HTMLInputElement | null;
+              const to = form.querySelector(
+                "#rebook-to"
+              ) as HTMLInputElement | null;
               if (!from || !to) return;
               const parts = parseDateParts(from.value);
               if (!parts) return;
               to.value = safeSetYear(parts.y + 1, parts.m, parts.d);
             },
-            styles: { padding: "6px 10px", borderRadius: "6px", background: "#fff", color: "#334155", border: "1px solid #e6eef3" },
+            styles: {
+              padding: "6px 10px",
+              borderRadius: "6px",
+              background: "#fff",
+              color: "#334155",
+              border: "1px solid #e6eef3",
+            },
           }),
         ]
       ),
@@ -115,41 +175,82 @@ export const openRebookDialog = async (): Promise<void> => {
   const mainAccountRow = makeEl(
     "div",
     {},
-    { display: "grid", gridTemplateColumns: "160px 1fr", alignItems: "center", gap: "8px" },
+    {
+      display: "grid",
+      gridTemplateColumns: "160px 1fr",
+      alignItems: "center",
+      gap: "8px",
+    },
     [
-      makeEl("label", { for: "rebook-main-account", text: t("main_account_code") || "Main account code" }, labelStyle),
-      makeEl("input", { id: "rebook-main-account", type: "text", value: "" }, inputStyle),
+      makeEl(
+        "label",
+        {
+          for: "rebook-main-account",
+          text: t("main_account_code") || "Main account code",
+        },
+        labelStyle
+      ),
+      makeEl(
+        "input",
+        { id: "rebook-main-account", type: "text", value: "" },
+        inputStyle
+      ),
     ]
   );
 
   const rebookAccountRow = makeEl(
     "div",
     {},
-    { display: "grid", gridTemplateColumns: "160px 1fr", alignItems: "center", gap: "8px" },
+    {
+      display: "grid",
+      gridTemplateColumns: "160px 1fr",
+      alignItems: "center",
+      gap: "8px",
+    },
     [
-      makeEl("label", { for: "rebook-account", text: t("rebook_account") || "Rebook account" }, labelStyle),
-      makeEl("input", { id: "rebook-account", type: "text", value: "" }, inputStyle),
+      makeEl(
+        "label",
+        {
+          for: "rebook-account",
+          text: t("rebook_account") || "Rebook account",
+        },
+        labelStyle
+      ),
+      makeEl(
+        "input",
+        { id: "rebook-account", type: "text", value: "" },
+        inputStyle
+      ),
     ]
   );
 
   // Attach autocomplete to account inputs
   const attachAccountAutocomplete = (input: HTMLInputElement) => {
     // container for suggestion list
-    const container = makeEl("div", {}, {
-      position: "absolute",
-      zIndex: "9999",
-      background: "#fff",
-      border: "1px solid #e5e7eb",
-      borderRadius: "6px",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-      maxHeight: "240px",
-      overflow: "auto",
-      width: "100%",
-      display: "none",
-    });
+    const container = makeEl(
+      "div",
+      {},
+      {
+        position: "absolute",
+        zIndex: "9999",
+        background: "#fff",
+        border: "1px solid #e5e7eb",
+        borderRadius: "6px",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+        maxHeight: "240px",
+        overflow: "auto",
+        width: "100%",
+        display: "none",
+      }
+    );
 
     // wrap input in relative container so absolute dropdown positions correctly
-    const wrapper = makeEl("div", {}, { position: "relative", width: "100%" }, []);
+    const wrapper = makeEl(
+      "div",
+      {},
+      { position: "relative", width: "100%" },
+      []
+    );
     // replace input in its parent with the wrapper, then move the input into the wrapper
     const parent = input.parentElement;
     if (parent) {
@@ -181,15 +282,23 @@ export const openRebookDialog = async (): Promise<void> => {
       }
 
       results.forEach((opt, idx) => {
-        const item = makeEl("div", {}, {
-          padding: "8px",
-          cursor: "pointer",
-          borderBottom: idx === results.length - 1 ? "none" : "1px solid #f3f4f6",
-          background: idx === focusedIndex ? "#eef2f7" : "#fff",
-        }, [
-          makeEl("div", {}, { fontWeight: "600" }, [opt.label]),
-          makeEl("div", {}, { color: "#6b7280", fontSize: "12px" }, [opt.value]),
-        ]);
+        const item = makeEl(
+          "div",
+          {},
+          {
+            padding: "8px",
+            cursor: "pointer",
+            borderBottom:
+              idx === results.length - 1 ? "none" : "1px solid #f3f4f6",
+            background: idx === focusedIndex ? "#eef2f7" : "#fff",
+          },
+          [
+            makeEl("div", {}, { fontWeight: "600" }, [opt.label]),
+            makeEl("div", {}, { color: "#6b7280", fontSize: "12px" }, [
+              opt.value,
+            ]),
+          ]
+        );
 
         item.addEventListener("mousedown", (e) => {
           // prevent blur
@@ -287,7 +396,10 @@ export const openRebookDialog = async (): Promise<void> => {
   // Persist last-used account codes so the extension can prefill them next time.
   const LAST_REBOOK_ACCOUNT_IDENTIFIER = "last_rebook_account_v1";
 
-  const tryResolveAndFill = async (input: HTMLInputElement, storedCode: string | null) => {
+  const tryResolveAndFill = async (
+    input: HTMLInputElement,
+    storedCode: string | null
+  ) => {
     if (!storedCode) return;
     // prefer to set the dataset accountCode so submission uses the stored value
     input.dataset.accountCode = storedCode;
@@ -310,8 +422,11 @@ export const openRebookDialog = async (): Promise<void> => {
   (async () => {
     try {
       const storedRebook = localStorage.getItem(LAST_REBOOK_ACCOUNT_IDENTIFIER);
-      const rebookInput = rebookAccountRow.querySelector("input") as HTMLInputElement | null;
-      if (rebookInput && storedRebook) await tryResolveAndFill(rebookInput, storedRebook);
+      const rebookInput = rebookAccountRow.querySelector(
+        "input"
+      ) as HTMLInputElement | null;
+      if (rebookInput && storedRebook)
+        await tryResolveAndFill(rebookInput, storedRebook);
     } catch (err) {
       // ignore storage errors
     }
@@ -324,7 +439,9 @@ export const openRebookDialog = async (): Promise<void> => {
   form.appendChild(rebookAccountRow);
 
   // date helpers used by the button handlers (scoped here so createButton handlers can call them)
-  const parseDateParts = (v: string): { y: number; m: number; d: number } | null => {
+  const parseDateParts = (
+    v: string
+  ): { y: number; m: number; d: number } | null => {
     if (!v) return null;
     const parts = v.split("-");
     if (parts.length !== 3) return null;
@@ -336,7 +453,9 @@ export const openRebookDialog = async (): Promise<void> => {
   };
 
   const formatYMD = (y: number, m: number, d: number) =>
-    `${String(y).padStart(4, "0")}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    `${String(y).padStart(4, "0")}-${String(m).padStart(2, "0")}-${String(
+      d
+    ).padStart(2, "0")}`;
 
   const safeSetYear = (y: number, m: number, d: number): string => {
     // Try to construct date with same month/day and new year. If invalid (e.g. Feb 29 -> Feb 29 on non-leap year),
@@ -364,9 +483,24 @@ export const openRebookDialog = async (): Promise<void> => {
   );
 
   const makeResultLine = (text: string, ok = true) => {
-    return makeEl("div", {}, { display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }, [
-      makeEl("div", {}, { fontWeight: "600", color: ok ? "#065f46" : "#7f1d1d" }, [text]),
-    ]);
+    return makeEl(
+      "div",
+      {},
+      {
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        marginBottom: "6px",
+      },
+      [
+        makeEl(
+          "div",
+          {},
+          { fontWeight: "600", color: ok ? "#065f46" : "#7f1d1d" },
+          [text]
+        ),
+      ]
+    );
   };
 
   const cancelBtn = createButton({
@@ -391,17 +525,15 @@ export const openRebookDialog = async (): Promise<void> => {
   const handleSubmit = async () => {
     // Read fields
     const desc =
-      (document.getElementById("rebook-desc") as HTMLInputElement).value ||
-      "";
+      (document.getElementById("rebook-desc") as HTMLInputElement).value || "";
     const amt =
       parseFloat(
-        (document.getElementById("rebook-amount") as HTMLInputElement)
-          .value || "0"
+        (document.getElementById("rebook-amount") as HTMLInputElement).value ||
+          "0"
       ) || 0;
     const from = (document.getElementById("rebook-from") as HTMLInputElement)
       .value;
-    const to = (document.getElementById("rebook-to") as HTMLInputElement)
-      .value;
+    const to = (document.getElementById("rebook-to") as HTMLInputElement).value;
     const mainAccInput = document.getElementById(
       "rebook-main-account"
     ) as HTMLInputElement;
@@ -412,9 +544,13 @@ export const openRebookDialog = async (): Promise<void> => {
     // Prefer the selected account code stored in data-account-code. If not set,
     // fall back to the raw input value (in case user typed a code manually).
     const mainAcc =
-      (mainAccInput?.dataset?.accountCode as string) || mainAccInput?.value || "";
+      (mainAccInput?.dataset?.accountCode as string) ||
+      mainAccInput?.value ||
+      "";
     const rebookAcc =
-      (rebookAccInput?.dataset?.accountCode as string) || rebookAccInput?.value || "";
+      (rebookAccInput?.dataset?.accountCode as string) ||
+      rebookAccInput?.value ||
+      "";
 
     if (!mainAcc || !rebookAcc || !from || !to || !amt) {
       resultBox.style.display = "";
@@ -429,8 +565,7 @@ export const openRebookDialog = async (): Promise<void> => {
     const sessionId = getSessionId();
     if (!sessionId) {
       resultBox.style.display = "";
-      resultBox.textContent =
-        t("rebook_no_session") || "Session ID not found.";
+      resultBox.textContent = t("rebook_no_session") || "Session ID not found.";
       submitBtn.disabled = false;
       submitBtn.textContent = t("rebook_transaction") || "Rebook";
       return;
@@ -472,16 +607,22 @@ export const openRebookDialog = async (): Promise<void> => {
       });
 
       resultBox.innerHTML = "";
-      resultBox.appendChild(makeResultLine(t("rebook_created") || "Created documents:", true));
+      resultBox.appendChild(
+        makeResultLine(t("rebook_created") || "Created documents:", true)
+      );
       resultBox.appendChild(
         makeResultLine(
-          `doc1: ${doc1.success ? doc1.documentId || "" : `ERROR: ${doc1.error}`}`,
+          `doc1: ${
+            doc1.success ? doc1.documentId || "" : `ERROR: ${doc1.error}`
+          }`,
           !!doc1.success
         )
       );
       resultBox.appendChild(
         makeResultLine(
-          `doc2: ${doc2.success ? doc2.documentId || "" : `ERROR: ${doc2.error}`}`,
+          `doc2: ${
+            doc2.success ? doc2.documentId || "" : `ERROR: ${doc2.error}`
+          }`,
           !!doc2.success
         )
       );
@@ -495,13 +636,20 @@ export const openRebookDialog = async (): Promise<void> => {
         // ignore storage errors
       }
 
-      // Change submit button to a Done action that closes the modal
-      submitBtn.disabled = false;
-      submitBtn.textContent = t("done") || "Done";
-      submitBtn.onclick = () => overlay.remove();
-      Object.assign(submitBtn.style, { background: "#10b981", borderColor: "#10b981" });
+
+      const doneBtn = submitBtn.cloneNode(true) as HTMLButtonElement;
+      doneBtn.disabled = false;
+      doneBtn.textContent = t("done") || "Done";
+      doneBtn.onclick = () => overlay.remove();
+      Object.assign(doneBtn.style, {
+        background: "#10b981",
+        borderColor: "#10b981",
+      });
+      // Replace in DOM
+      submitBtn.parentElement?.replaceChild(doneBtn, submitBtn);
     } catch (err) {
-      const msg = (err instanceof Error ? err.message : String(err)) || String(err);
+      const msg =
+        (err instanceof Error ? err.message : String(err)) || String(err);
       resultBox.innerHTML = "";
       resultBox.appendChild(makeResultLine(msg, false));
       resultBox.style.display = "block";
