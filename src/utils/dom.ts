@@ -6,6 +6,56 @@ export const ready = (fn: () => void): void => {
   }
 };
 
+/**
+ * Observes the DOM and invokes a callback for every element that is created
+ * matching a given CSS selector.
+ *
+ * @param selector The CSS selector of the elements to watch for.
+ * @param callback The function to invoke with the matched element.
+ * @returns A function that can be called to disconnect the observer.
+ */
+export const onElementCreated = (
+  selector: string,
+  callback: (el: Element) => void
+): (() => void) => {
+  // 1. First, run the callback for any elements that already exist
+  document.querySelectorAll(selector).forEach(callback);
+
+  // 2. Then, create an observer to watch for future additions
+  const observer = new MutationObserver((mutationsList) => {
+    for (const mutation of mutationsList) {
+      if (mutation.type !== 'childList') continue;
+
+      // @ts-ignore
+      for (const node of mutation.addedNodes) {
+        // We only care about Element nodes
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as Element;
+
+          // Check if the added element itself matches the selector
+          if (el.matches(selector)) {
+            callback(el);
+          }
+
+          // Check if any descendants of the added element match the selector
+          el.querySelectorAll(selector).forEach(callback);
+        }
+      }
+    }
+  });
+
+  // 3. Start observing the entire document body for additions
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+  });
+
+  // 4. Return a cleanup function to allow the caller to stop observing
+  return () => {
+    observer.disconnect();
+  };
+};
+
 export const onElementAvailable = (
   selector: string,
   callback: (el: Element) => void

@@ -1,8 +1,45 @@
-import { createInputButton } from "./ui/components";
+import { t } from "./i18n";
+import { createInputButton, createToolbarCheckbox } from "./ui/components";
 import { openExcelImportDialog } from "./ui/excel-import";
 import { openPasteImportDialog } from "./ui/paste-import";
-import { onElementAvailable, ready } from "./utils/dom";
-import { t } from "./i18n";
+import { onElementAvailable, onElementCreated, ready } from "./utils/dom";
+import { getSessionId } from "./utils/session";
+
+let fastSearchEnabled = true;
+window.addEventListener("better-all-united-fast-search-state", (event: any) => {
+  fastSearchEnabled = event.detail.enabled;
+});
+
+const attachFastSearchButtons = (): void => {
+  // iframe with id framed-frontend-21000004
+  const selector = 'div.dx-toolbar-items-container';
+
+  onElementCreated(selector, () => {
+    const targetContainers = document.getElementsByClassName(
+      "dx-toolbar-after"
+    );
+    if (targetContainers.length === 0) return;
+    const targetContainer = targetContainers[0];
+
+    const checkbox = createToolbarCheckbox({
+      id: "fast-search-contacts",
+      text: t("fast_search"),
+      title: "",
+      checked: fastSearchEnabled,
+      onChange: (e) => {
+        const enabled = (e.target as HTMLInputElement).checked;
+        window.dispatchEvent(
+          new CustomEvent("better-all-united-fast-search-state", {
+            detail: { enabled },
+          })
+        );
+      },
+    });
+
+    targetContainer.appendChild(checkbox);
+  });
+};
+
 
 const attachCourseMembersButtons = (): void => {
   const selector = '[data-row-name-prefix="course[_subforms_][coursemembers]"]';
@@ -37,10 +74,8 @@ const attachCourseMembersButtons = (): void => {
   });
 };
 
-// Setup request interceptor for enhanced multi-word search
 
 
-// src/content.ts
 function injectInpageScript() {
   const script = document.createElement("script");
   // Use a safe access to window.chrome to avoid TypeScript "Cannot find name 'chrome'"
@@ -67,4 +102,22 @@ try {
 
 ready(() => {
   attachCourseMembersButtons();
+  attachFastSearchButtons();
 });
+
+// If we can determine a session id here, broadcast the current fast-search state to all iframes
+try {
+  const sessionId = getSessionId();
+  if (sessionId) {
+    // Always broadcast session id so inpage scripts can use it even if the
+    // fast-search checkbox hasn't been created yet.
+    const sidEvt = new CustomEvent("better-all-united-sessionid", { detail: { sessionId } });
+    window.dispatchEvent(sidEvt);
+    const frames = document.getElementsByTagName("iframe");
+    for (const f of Array.from(frames)) {
+      try { f.contentWindow?.dispatchEvent(sidEvt); } catch (e) { /* ignore */ }
+    }
+  }
+} catch (e) {
+  console.error("[Better AllUnited] Error broadcasting fast-search-state to iframes", e);
+}

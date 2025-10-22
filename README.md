@@ -7,8 +7,8 @@ Een kleine browserextensie die de All United-website verbetert door extra import
 ### Functies
 
 - Excel-import ondersteuning (gebruikt `xlsx`) voor evenementen
-- Verbeterde naamzoek functie
-- Meer in de toekomst?
+- Verbeterde naamzoek functie voor deelnemers en factuur paginas
+- Snelle zoekfunctie voor ledenlijsten
 
 ### Installatie
 - Download de laatste release (better-all-united-vX.zip) van de [GitHub-pagina](https://github.com/BenStokmans/better-all-united/releases/latest)

@@ -23,9 +23,10 @@ const buildFindPayload = (searchTerm: string): string => {
 
 export const performSearch = async (
   searchTerm: string,
-  signal?: AbortSignal | null
+  storedSessionId?: string | null,
+  signal?: AbortSignal | null,
 ): Promise<Array<{ value: string; label: string }>> => {
-  const sessionId = getSessionId();
+  const sessionId = getSessionId() || storedSessionId;
   if (!sessionId) throw new Error("Session ID not found.");
 
   const url = `${location.origin}/_ajax.php?sessionid=${encodeURIComponent(

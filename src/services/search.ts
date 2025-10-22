@@ -15,7 +15,7 @@ export const findContactForName = async (
 
   // Primary search by last name
   if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-  const lastNameOptions = await performSearch(parsedName.lastName, signal);
+  const lastNameOptions = await performSearch(parsedName.lastName, null, signal);
 
   if (!lastNameOptions.length) {
     return { status: "notFound", reason: "No matches for last name" };
@@ -29,7 +29,7 @@ export const findContactForName = async (
   if (parsedName.firstName) {
     const firstToken = parsedName.firstName.split(/\s+/)[0];
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-    firstNameOptions = await performSearch(firstToken, signal);
+    firstNameOptions = await performSearch(firstToken, null, signal);
   }
 
   // Merge and try again

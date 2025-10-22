@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Better All United",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "",
   "permissions": ["activeTab", "scripting"],
   "content_scripts": [
     {
       "matches": ["https://*.allunited.nl/*"],
-      "js": ["dist/bundle.js"]
+      "js": ["dist/bundle.js"],
+      "all_frames": true
     }
   ],
   "web_accessible_resources": [
