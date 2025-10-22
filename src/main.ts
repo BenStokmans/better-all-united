@@ -22,6 +22,11 @@ const attachFastSearchButtons = (): void => {
     if (targetContainers.length === 0) return;
     const targetContainer = targetContainers[0];
 
+    // check if already added
+    if (targetContainer.querySelector("#fast-search-contacts")) {
+      return;
+    }
+
     const checkbox = createToolbarCheckbox({
       id: "fast-search-contacts",
       text: t("fast_search"),

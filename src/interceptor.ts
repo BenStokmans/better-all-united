@@ -203,11 +203,13 @@ const fastSearchFetchInterceptor: FetchRequestInterceptor = {
       const body = options?.body;
       const searchTerm = extractDevExtremeSearchTerm(body);
       if (!searchTerm) {
-        // nothing for us to do, fall back
+        // nothing for us to do, fall back to the original (unmodified) init when available
         // @ts-ignore
+        console.log("[Better AllUnited] Fast search fetch interceptor: no search term found, falling back");
+        const originalInit = (options as any)?.__originalInit ?? options;
         return (window as any).__betterAllUnitedOriginalFetch
-          ? (window as any).__betterAllUnitedOriginalFetch(url, options)
-          : fetch(url, options);
+          ? (window as any).__betterAllUnitedOriginalFetch(url, originalInit)
+          : fetch(url, originalInit);
       }
 
       // Perform search(s) using performSearch (which uses the site's _ajax.php find-field endpoint)
@@ -244,13 +246,14 @@ const fastSearchFetchInterceptor: FetchRequestInterceptor = {
         status: 200,
         headers: { "Content-Type": "application/json; charset=utf-8" },
       });
-    } catch (e) {
+      } catch (e) {
       console.error("[Better AllUnited] Fast search fetch handler error", e);
-      // fallback to original fetch
+      // fallback to original fetch using preserved original init when available
+      const originalInit = (options as any)?.__originalInit ?? options;
       // @ts-ignore
       return (window as any).__betterAllUnitedOriginalFetch
-        ? (window as any).__betterAllUnitedOriginalFetch(url, options)
-        : fetch(url, options);
+        ? (window as any).__betterAllUnitedOriginalFetch(url, originalInit)
+        : fetch(url, originalInit);
     }
   },
 };
@@ -512,6 +515,9 @@ const setupFetchInterceptor = (): void => {
 
       // First try to find a fetch-level interceptor using the normalized init
       try {
+        // Preserve the original init so handlers can fall back to the unmodified request
+        (handlerInit as any).__originalInit = init;
+
         const handler = interceptorManager.findFetchHandler(url, handlerInit || {});
         if (handler) {
           try {
