@@ -61,6 +61,7 @@
   "failed_load_pricecodes": "Laden van prijscodes mislukt: {msg}",
 
   "import_excel": "Excel importeren",
+  "export_excel": "Excel exporteren",
   "import_paste": "Klembord importeren",
 
   "single_column": "Enkele kolom (alleen namen)",

@@ -1,6 +1,7 @@
 import { t } from "./i18n";
 import { createAnchorButton, createInputButton, createListItem, createToolbarCheckbox } from "./ui/components";
 import { openExcelImportDialog } from "./ui/excel-import";
+import { exportTableToExcel } from "./ui/excel-export";
 import { openPasteImportDialog } from "./ui/paste-import";
 import { openRebookDialog } from "./ui/rebook";
 import { onElementAvailable, onElementCreated, ready } from "./utils/dom";
@@ -50,6 +51,7 @@ const attachFastSearchButtons = (): void => {
 const attachCourseMembersButtons = (): void => {
   const selector = '[data-row-name-prefix="course[_subforms_][coursemembers]"]';
   const idExcel = "import-course-members-excel";
+  const idExport = "export-course-members-excel";
   const idPaste = "import-course-members-paste";
 
   onElementAvailable(selector, () => {
@@ -67,6 +69,16 @@ const attachCourseMembersButtons = (): void => {
         styles: { marginRight: "8px" },
       });
       targetContainer.appendChild(button1);
+    }
+
+    if (!targetContainer.querySelector(`#${idExport}`)) {
+      const buttonExport = createInputButton({
+        id: idExport,
+        text: t("export_excel"),
+        onClick: exportTableToExcel,
+        styles: { marginRight: "8px" },
+      });
+      targetContainer.appendChild(buttonExport);
     }
 
     if (!targetContainer.querySelector(`#${idPaste}`)) {
