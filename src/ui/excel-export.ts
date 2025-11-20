@@ -127,6 +127,54 @@ export const exportTableToExcel = (): void => {
       colsToKeep.map((i) => row[i])
     );
 
+    // Helper to format names into "<firstname> <optional inbetween> <lastname>"
+    const formatName = (raw: any): string => {
+      if (raw == null) return "";
+      let s = String(raw).trim();
+      if (!s) return "";
+
+      // strip HTML
+      s = s.replace(/<[^>]+>/g, "").trim();
+
+      // extract parenthesis content (preferred firstname)
+      const parenMatch = s.match(/\(([^)]+)\)/);
+      const paren = parenMatch ? parenMatch[1].trim() : "";
+
+      // remove parenthetical part for parsing
+      const noParen = s.replace(/\([^)]+\)/g, "").trim();
+
+      // split last, rest by comma
+      const parts = noParen.split(",");
+      const baseLast = parts[0] ? parts[0].trim() : "";
+      const right = parts[1] ? parts[1].trim() : "";
+
+      // tokens on the right may include initials and prefix particles (van, de, etc.)
+      let tokens = right ? right.split(/\s+/).filter(Boolean) : [];
+
+      // filter out obvious initials like 'C.M.' or 'B.' or single letters
+      tokens = tokens.filter((t) => !/^([A-Z](?:\.|$))+$/.test(t) && !/^[A-Z]$/.test(t));
+
+      // prefix tokens usually start with lowercase (van, de, van der, 't, etc.)
+      const prefixTokens = tokens.filter((t) => /^[a-zà-ž'’`-]/.test(t));
+      const remainingTokens = tokens.filter((t) => !prefixTokens.includes(t));
+
+      const firstname = paren || remainingTokens.filter(t => /^[A-Za-zÀ-ž].{1,}$/.test(t)).join(" ") || "";
+
+      const surname = baseLast ? (prefixTokens.length ? prefixTokens.join(" ") + " " + baseLast : baseLast) : baseLast;
+
+      if (!firstname) return surname || s;
+      return surname ? `${firstname} ${surname}` : firstname;
+    };
+
+    // Find the index of the 'Naam' column (header may have been set earlier)
+    const headerLower = filtered_ws_data[0].map((h) => (h == null ? "" : String(h).trim().toLowerCase()));
+    const naamIndex = headerLower.findIndex((h) => h === "naam");
+    if (naamIndex >= 0) {
+      for (let r = 1; r < filtered_ws_data.length; r++) {
+        filtered_ws_data[r][naamIndex] = formatName(filtered_ws_data[r][naamIndex]);
+      }
+    }
+
     const ws = XLSX.utils.aoa_to_sheet(filtered_ws_data);
     XLSX.utils.book_append_sheet(wb, ws, "Export");
     XLSX.writeFile(wb, "export.xlsx");

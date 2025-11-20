@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Better All United",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "",
   "permissions": ["activeTab", "scripting"],
   "content_scripts": [
